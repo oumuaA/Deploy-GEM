@@ -8,3 +8,4 @@ fastapi-limiter
 Pillow
 google-generativeai
 python-dotenv
+jinja2
