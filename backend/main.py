@@ -19,7 +19,8 @@ from email.mime.multipart import MIMEMultipart
 BASE_DIR = Path(__file__).resolve().parent.parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "frontend"))
 # Assuming 'extract.py' is in the same directory
-from extract import process_base64_image, PROMPT # Import PROMPT directly from extract
+from backend.extract import process_base64_image, PROMPT
+ # Import PROMPT directly from extract
 
 app = FastAPI()
 # Adjust this path to your actual frontend directory
