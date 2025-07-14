@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gem ANPR - Auth & Image Processing</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            // Clean and Modern Theme
+            primary: {
+              light: '#F8F9FA', // Very light gray, almost white for light mode background
+              dark: '#1A1B22',  // Deep charcoal/off-black for dark mode background
+            },
+            secondary: {
+              light: '#FFFFFF', // Pure white for cards/elements in light mode
+              dark: '#2C2E3A',  // Slightly lighter charcoal for cards/elements in dark mode
+            },
+            accent: '#007BFF', // Classic, clean blue - primary accent color
+            text: {
+              light: '#343A40', // Dark gray for text on light backgrounds (Sharp contrast)
+              dark: '#E9ECEF',  // Light gray for text on dark backgrounds
+            },
+            border: {
+              light: '#DEE2E6', // Light subtle gray for borders
+              dark: '#495057',  // Dark subtle gray for borders in dark mode
+            },
+            danger: '#DC3545', // Standard red for clear/error actions
+            success: '#28A745', // Standard green for success messages
+          },
+          backgroundImage: {
+            'gradient-hero-light': 'linear-gradient(135deg, #E9ECEF, #F8F9FA)', // Subtle light gradient
+            'gradient-hero-dark': 'linear-gradient(135deg, #1A1B22, #2C2E3A)', // Subtle dark gradient
+          },
+          boxShadow: {
+            'card-light': '0 4px 12px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.03)', // Very subtle shadows
+            'card-dark': '0 8px 20px rgba(0, 0, 0, 0.4), 0 4px 10px rgba(0, 0, 0, 0.3)',   // More pronounced but still clean shadows for dark theme
+            'button-accent': '0 0 8px rgba(0, 123, 255, 0.5)', // Subtle blue glow
+            'button-danger': '0 0 8px rgba(220, 53, 69, 0.5)', // Subtle red glow
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* Custom styles for Inter font and general body styling */
+    body {
+        font-family: 'Inter', sans-serif;
+        line-height: 1.7; /* Enhanced readability */
+        overflow-x: hidden; /* Prevent horizontal scroll */
+        transition: background-color 0.3s ease, color 0.3s ease; /* Faster smooth theme transition */
+    }
+
+    /* Custom button styling for a more professional look */
+    .btn-base-style {
+        @apply inline-flex items-center justify-center w-full font-bold py-3 px-8 rounded-lg shadow-md
+               transition-all duration-150 ease-in-out text-lg tracking-wide focus:outline-none focus:ring-2 focus:ring-opacity-75;
+    }
+
+    .btn-primary-theme {
+        @apply bg-accent text-white; /* Solid accent background, white text */
+    }
+    .btn-danger-theme {
+        @apply bg-danger text-white;
+    }
+
+    .btn-hover-effect {
+        @apply hover:shadow-lg transform hover:-translate-y-1 hover:scale-102;
+    }
+    .btn-primary-theme.btn-hover-effect:hover {
+        box-shadow: theme('boxShadow.button-accent');
+    }
+    .btn-danger-theme.btn-hover-effect:hover {
+        box-shadow: theme('boxShadow.button-danger');
+    }
+
+    .btn-active-effect {
+        /* This class will be added/removed by JS on mousedown/mouseup */
+        transform: scale(0.98) !important; /* Very subtle scale down */
+        transition: transform 0.05s ease-out; /* Faster transition */
+        box-shadow: theme('boxShadow.button-accent') !important; /* Consistent shadow on press */
+    }
+    .btn-danger-theme.btn-active-effect {
+        box-shadow: theme('boxShadow.button-danger') !important;
+    }
+
+
+    /* Feature Card - Dynamic and elevated */
+    .feature-card {
+        @apply p-10 rounded-xl transition-all duration-300 transform hover:-translate-y-2; /* Slightly less pronounced lift for modern feel */
+        box-shadow: theme('boxShadow.card-light');
+        background-color: theme('colors.secondary.light');
+    }
+    html.dark .feature-card {
+        box-shadow: theme('boxShadow.card-dark');
+        background-color: theme('colors.secondary.dark');
+    }
+
+    /* Fade-in animation for sections */
+    .fade-in-section {
+        opacity: 0;
+        transform: translateY(50px); /* Less dramatic slide up for modern feel */
+        transition: opacity 0.5s ease-out, transform 0.5s ease-out; /* Slightly slower transition for smoothness */
+    }
+    .fade-in-section.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Demo Input Field Styling */
+    .demo-input {
+        @apply w-full p-4 rounded-lg border focus:outline-none focus:ring-2 transition-all duration-150; /* Faster transition */
+        background-color: theme('colors.secondary.dark'); /* Darker input background */
+        color: theme('colors.text.dark'); /* Light text for contrast */
+        border-color: theme('colors.border.dark'); /* Subtle border */
+        --tw-ring-color: theme('colors.accent'); /* Accent color for ring */
+    }
+    .demo-input::placeholder {
+        color: theme('colors.gray.500'); /* Lighter placeholder on dark background */
+    }
+    html.light .demo-input { /* Specific light mode input styling */
+        background-color: theme('colors.white');
+        color: theme('colors.text.light');
+        border-color: theme('colors.border.light');
+    }
+
+
+    /* Dark Mode Toggle Button in Navbar */
+    #theme-toggle {
+        @apply bg-secondary-light text-text-light p-2 rounded-full hover:bg-border-light hover:text-text-light transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent;
+    }
+    html.dark #theme-toggle {
+        @apply bg-secondary-dark text-text-dark hover:bg-border-dark hover:text-text-dark focus:ring-2 focus:ring-accent;
+    }
+
+    /* Modal styles for image expansion */
+    .image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8); /* Slightly less dark overlay */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease; /* Faster transition */
+    }
+    .image-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .image-modal img {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+        border-radius: 0.75rem; /* rounded-xl */
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Subtle shadow */
+    }
+
+    /* Hero Background Animation - Hexagonal Grid (simplified for modern) */
+    .hero-background-animation {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: -1; /* Ensure it's behind content */
+        perspective: 1000px; /* For 3D transforms */
+    }
+
+    .hero-background-animation .hexagon {
+        position: absolute;
+        width: 80px; /* Slightly smaller hexagons */
+        height: 80px;
+        background-color: rgba(0, 123, 255, 0.08); /* Subtle blue tint */
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        animation: floatHexagon 20s infinite ease-in-out alternate, glowHexagon 3s infinite alternate; /* Slower, more subtle animation */
+    }
+    html.dark .hero-background-animation .hexagon {
+        background-color: rgba(0, 123, 255, 0.12); /* Slightly more opaque in dark mode */
+    }
+    html.light .hero-background-animation .hexagon { /* Even more subtle in light mode */
+        background-color: rgba(0, 123, 255, 0.04);
+    }
+
+    /* Individual hexagon positions and animation delays (adjusted for more subtle movement) */
+    .hero-background-animation .hexagon:nth-child(1) { top: 15%; left: 10%; animation-delay: 0s; animation-duration: 12s; }
+    .hero-background-animation .hexagon:nth-child(2) { top: 70%; left: 85%; animation-delay: 2s; animation-duration: 14s; }
+    .hero-background-animation .hexagon:nth-child(3) { top: 25%; left: 45%; animation-delay: 1s; animation-duration: 10s; }
+    .hero-background-animation .hexagon:nth-child(4) { top: 85%; left: 20%; animation-delay: 3s; animation-duration: 15s; }
+    .hero-background-animation .hexagon:nth-child(5) { top: 10%; left: 60%; animation-delay: 0.5s; animation-duration: 11s; }
+    .hero-background-animation .hexagon:nth-child(6) { top: 50%; left: 5%; animation-delay: 3.5s; animation-duration: 13s; }
+    .hero-background-animation .hexagon:nth-child(7) { top: 90%; left: 70%; animation-delay: 1.5s; animation-duration: 16s; }
+    .hero-background-animation .hexagon:nth-child(8) { top: 30%; left: 90%; animation-delay: 2s; animation-duration: 12.5s; }
+    .hero-background-animation .hexagon:nth-child(9) { top: 65%; left: 15%; animation-delay: 0.8s; animation-duration: 10.5s; }
+    .hero-background-animation .hexagon:nth-child(10) { top: 40%; left: 80%; animation-delay: 2.2s; animation-duration: 14.5s; }
+
+
+    @keyframes floatHexagon {
+        0% { transform: translate(0, 0) rotate(0deg) scale(0.8); opacity: 0.6; } /* More subtle base scale/opacity */
+        50% { transform: translate(40px, 60px) rotate(180deg) scale(1.1); opacity: 0.4; } /* More subtle movement */
+        100% { transform: translate(0, 0) rotate(360deg) scale(0.8); opacity: 0.6; }
+    }
+
+    @keyframes glowHexagon {
+        0% { filter: brightness(1); opacity: 0.6; }
+        50% { filter: brightness(1.5); opacity: 0.8; } /* More subtle glow */
+        100% { filter: brightness(1); opacity: 0.6; }
+    }
+
+
+    /* Loading Indicator Animation */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.8; } /* Less pronounced pulse */
+    }
+
+    .loading-dot {
+      display: inline-block;
+      width: 16px; /* Slightly smaller dots */
+      height: 16px; /* Slightly smaller dots */
+      background-color: theme('colors.accent');
+      border-radius: 50%;
+      animation: pulse 0.8s infinite ease-in-out; /* Slower pulse */
+      margin: 0 5px; /* Slightly more spacing between dots */
+      box-shadow: 0 0 8px theme('colors.accent'); /* Subtle glow */
+    }
+    .loading-dot:nth-child(2) { animation-delay: 0.1s; } /* Adjusted delay */
+    .loading-dot:nth-child(3) { animation-delay: 0.2s; } /* Adjusted delay */
+
+
+    /* Result Display Animation */
+    @keyframes resultFadeIn {
+        0% { opacity: 0; transform: translateY(30px); } /* Less dramatic slide up */
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .result-fade-in {
+        animation: resultFadeIn 0.3s ease-out forwards; /* Slightly slower animation */
+    }
+
+    /* Modal specific styles */
+    .auth-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .auth-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    .auth-modal-content {
+        background-color: theme('colors.secondary.light');
+        padding: 2.5rem;
+        border-radius: 1rem;
+        box-shadow: theme('boxShadow.card-light');
+        max-width: 450px;
+        width: 90%;
+        position: relative;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+    }
+    html.dark .auth-modal-content {
+        background-color: theme('colors.secondary.dark');
+        box-shadow: theme('boxShadow.card-dark');
+    }
+    .auth-modal.show .auth-modal-content {
+        transform: translateY(0);
+    }
+    .auth-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: theme('colors.text.light');
+    }
+    html.dark .auth-modal-close {
+        color: theme('colors.text.dark');
+    }
+
+    /* Centering buttons within their containers */
+    .form-button-container {
+        @apply flex justify-center; /* Use flexbox to center the button */
+    }
+
+  </style>
+</head>
+<body class="bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark">
+
+  <!-- Header -->
+  <header class="bg-secondary-light dark:bg-secondary-dark shadow sticky top-0 z-50">
+    <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+      <!-- Left Section: Theme Toggle & Gem ANPR Title -->
+      <div class="flex items-center space-x-4">
+        <button id="theme-toggle" class="text-xl hover:text-accent transition" title="Toggle Theme">
+            <svg id="moon-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+            <svg id="sun-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12H2m15.325-7.757l-.707-.707M6.343 17.657l-.707.707M16.95 16.95l.707.707M7.05 7.05l-.707-.707M12 15a3 3 0 110-6 3 3 0 010 6z"></path>
+            </svg>
+        </button>
+        <h1 id="home-link-title" class="text-2xl font-extrabold tracking-tight text-text-light dark:text-text-dark cursor-pointer hover:text-accent transition">Gem ANPR</h1>
+      </div>
+
+      <!-- Center Section: Images Processed Display -->
+      <div class="flex-grow flex justify-center">
+        <div id="image-counter-display" class="bg-accent text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+          Images Processed: 0
+        </div>
+      </div>
+
+      <!-- Right Section: Navigation Links & Auth Buttons -->
+      <nav class="flex items-center space-x-6 text-sm font-semibold">
+        <a href="#interactive-demo" class="hover:text-accent transition">Demo</a>
+        <a href="#pricing" class="hover:text-accent transition">Pricing</a>
+        <a href="#contact" class="hover:text-accent transition">Contact</a>
+
+        <!-- Auth Buttons (visible when logged out) -->
+        <div id="auth-nav-buttons" class="flex items-center space-x-4">
+            <button id="nav-signup-btn" class="btn-base-style !w-auto py-2 px-4 text-sm btn-primary-theme btn-hover-effect">
+                Sign Up
+            </button>
+            <button id="nav-login-btn" class="btn-base-style !w-auto py-2 px-4 text-sm btn-primary-theme btn-hover-effect">
+                Login
+            </button>
+        </div>
+
+        <!-- Logged-in User Info (visible when logged in) -->
+        <div id="logged-in-nav-info" class="hidden flex items-center space-x-4">
+            <span class="text-text-light dark:text-text-dark text-sm font-semibold">Welcome, <span id="nav-logged-in-username" class="text-accent"></span>!</span>
+            <button id="nav-logout-btn" class="btn-base-style !w-auto py-2 px-4 text-sm btn-danger-theme btn-hover-effect">
+                Logout
+            </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative bg-gradient-hero-light dark:bg-gradient-hero-dark text-center py-32 px-4 overflow-hidden">
+    <!-- Animated background elements (Hexagons) -->
+    <div class="hero-background-animation">
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+        <div class="hexagon"></div>
+    </div>
+    <div class="container mx-auto max-w-4xl relative z-10"> <!-- Ensure content is above animation -->
+      <h2 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6 text-text-light dark:text-text-dark">Gem ANPR: Vison model for ANPR</h2>
+      <p class="text-lg md:text-xl opacity-90 mb-10 text-text-light dark:text-text-dark">Providing edge AI for fast and precise image analysis and data extraction.</p>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-24 px-6 bg-primary-light dark:bg-primary-dark transition-colors duration-500 fade-in-section">
+    <div class="container mx-auto text-center">
+      <h3 class="text-4xl font-extrabold text-text-light dark:text-text-dark mb-16">Our Core AI Capabilities</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div class="feature-card">
+          <div class="text-accent text-5xl mb-4">⚡️</div> <!-- Lightning bolt for speed -->
+          <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Hyper-Speed Processing</h4>
+          <p class="text-gray-600 dark:text-gray-400">Experience unparalleled speed with our optimized AI models.</p>
+        </div>
+        <div class="feature-card">
+          <div class="text-accent text-5xl mb-4">🧠</div> <!-- Brain for intelligence -->
+          <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Intelligent Recognition</h4>
+          <p class="text-gray-600 dark:text-gray-400">Advanced deep learning ensures superior accuracy in every scan.</p>
+        </div>
+        <div class="feature-card">
+          <div class="text-accent text-5xl mb-4">🌐</div> <!-- Globe for global reach/connectivity -->
+          <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Seamless Integration</h4>
+          <p class="text-gray-600 dark:text-gray-400">Effortlessly integrate QuantumScan AI into your existing workflows.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- Interactive Demo Section (Trial Section) -->
+    <section id="interactive-demo" class="py-40 px-4 bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark fade-in-section">
+        <div class="container mx-auto max-w-5xl">
+            <h3 class="text-5xl font-extrabold text-center mb-28 text-text-light dark:text-text-dark">Test QuantumScan AI Now!</h3>
+            <div class="demo-card p-12 rounded-3xl shadow-card-light dark:shadow-card-dark border border-border-light dark:border-border-dark bg-secondary-light dark:bg-secondary-dark space-y-10">
+                <p class="text-xl text-gray-600 dark:text-gray-400 text-center mb-8 font-light">Upload an image or paste a Base64 string to see our AI in action.</p>
+
+                <!-- Image Processing Section (Hidden by default, shown after login) -->
+                <div id="image-processing-section" class="space-y-10">
+                    <h4 class="text-3xl font-bold text-center text-accent mb-6">Image Processing Tools</h4>
+                    <p id="image-processing-status" class="text-lg text-center font-medium text-gray-600 dark:text-gray-400 mb-4"></p>
+
+                    <div id="input-sections-container" class="grid grid-cols-1 md:grid-cols-3 justify-center items-stretch gap-10">
+                        <!-- File Input -->
+                        <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
+                            <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Upload Image (File Input)</h4>
+                            <form id="upload-form" class="flex flex-col items-center space-y-6">
+                                <label for="file-upload" class="relative cursor-pointer inline-flex items-center justify-center w-full
+                                        btn-base-style btn-primary-theme btn-hover-effect">
+                                    <span>Choose File</span>
+                                    <input id="file-upload" type="file" name="file" class="sr-only" accept="image/*">
+                                </label>
+                                <div class="form-button-container w-full">
+                                    <button type="submit" id="upload-submit-btn" class="btn-base-style btn-primary-theme btn-hover-effect !w-auto px-10">
+                                        Process Uploaded Image
+                                    </button>
+                                </div>
+                                <p id="upload-result" class="mt-4 text-lg font-semibold text-center text-success"></p>
+                            </form>
+                        </div>
+
+                        <!-- Image Preview Section - Moved here -->
+                        <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
+                            <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Image Preview</h4>
+                            <div id="loading-indicator" class="hidden text-center text-accent font-medium mt-4">
+                                Processing<span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+                            </div>
+                            <div id="image-preview-container" class="hidden mt-4 space-y-6">
+                                <img id="image-preview" src="#" alt="Image Preview" class="max-w-full h-auto rounded-lg shadow-md mx-auto border border-border-light dark:border-border-dark cursor-pointer">
+                                <div class="flex justify-center">
+                                    <button id="clear-image-btn" class="
+                                            btn-base-style btn-danger-theme btn-hover-effect">
+                                        Clear Image
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Base64 Input Section - Always visible now -->
+                        <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
+                            <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Submit Base64 String</h4>
+                            <form id="base64-form" class="flex flex-col items-center space-y-6">
+                                <textarea id="base64-input" name="base64_str" rows="10" placeholder="Paste base64 string here or it will be populated from image upload..."
+                                          class="demo-input resize-y min-h-[150px]"></textarea>
+                                <div class="form-button-container w-full">
+                                    <button type="submit" id="base64-submit-btn" class="btn-base-style btn-primary-theme btn-hover-effect !w-auto px-10">
+                                        Process Base64 String
+                                    </button>
+                                </div>
+                            </form>
+                            <p id="base64-result" class="mt-4 text-lg font-semibold text-center text-success"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+  <!-- Pricing - Restored -->
+  <section id="pricing" class="py-24 px-4 bg-secondary-light dark:bg-primary-dark transition-colors text-center fade-in-section">
+    <div class="container mx-auto max-w-2xl">
+      <h3 class="text-4xl font-extrabold text-text-light dark:text-text-dark mb-10">Flexible Pricing for Future-Ready Solutions</h3>
+      <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">Our pricing models are being calibrated to provide scalable, intelligent solutions for individuals and enterprises. Stay tuned for launch details.</p>
+      <button class="bg-border-light dark:bg-border-dark text-gray-600 dark:text-gray-400 font-bold py-3 px-6 rounded-lg cursor-not-allowed">Coming Soon</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="contact" class="bg-primary-dark text-text-dark text-center py-12">
+    <div class="container mx-auto">
+      <p class="text-lg font-mono">&copy; 2025 Gem ANPR AI. All rights reserved.</p>
+      <p class="text-sm opacity-70 mt-3">
+        Connect with us: <a href="mailto:info@quantumscan.ai" class="text-accent hover:underline">info@GemANPR.ai</a>
+      </p>
+      <p class="text-xs mt-4 opacity-40">Engineered for the next generation of AI vision. 🚀</p>
+    </div>
+  </footer >
+
+  <!-- Image Modal Structure -->
+  <div id="image-modal" class="image-modal">
+      <img id="modal-image" src="" alt="Enlarged Image">
+  </div>
+
+  <!-- Custom Alert Modal Structure -->
+  <div id="custom-alert-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-[101] transition-opacity duration-300 opacity-0 hidden">
+      <div class="bg-secondary-dark p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300 border border-border-dark">
+          <p class="text-xl text-text-dark text-center mb-6 font-medium"></p>
+          <button id="custom-alert-modal-close-btn" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
+              OK
+          </button>
+      </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="register-modal" class="auth-modal">
+      <div class="auth-modal-content">
+          <span class="auth-modal-close" id="register-modal-close">&times;</span>
+          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Register Account</h5>
+          <form id="register-form" class="flex flex-col items-center space-y-4">
+              <input type="email" id="register-email" placeholder="Email" required
+                     class="demo-input">
+              <input type="text" id="register-username" placeholder="Username" required
+                     class="demo-input">
+              <input type="password" id="register-password" placeholder="Password" required
+                     class="demo-input">
+              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
+                  Register
+              </button>
+          </form>
+          <p id="register-message" class="mt-4 text-lg font-semibold text-center"></p>
+          <p class="text-center text-gray-500 dark:text-gray-400 mt-4">Already have an account? <a href="#" id="modal-show-login" class="text-accent hover:underline">Login here</a></p>
+      </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="auth-modal">
+      <div class="auth-modal-content">
+          <span class="auth-modal-close" id="login-modal-close">&times;</span>
+          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Login to Your Account</h5>
+          <form id="login-form" class="flex flex-col items-center space-y-4">
+              <input type="email" id="login-email" placeholder="Email" required
+                     class="demo-input">
+              <input type="password" id="login-password" placeholder="Password" required
+                     class="demo-input">
+              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
+                  Login
+              </button>
+          </form>
+          <p id="login-message" class="mt-4 text-lg font-semibold text-center"></p>
+          <p class="text-center text-gray-500 dark:text-gray-400 mt-4">Don't have an account? <a href="#" id="modal-show-register" class="text-accent hover:underline">Register here</a></p>
+          <p class="text-center text-gray-500 dark:text-gray-400 mt-4"><a href="#" id="modal-forgot-password" class="text-accent hover:underline">Forgot Password?</a></p>
+      </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="forgot-password-modal" class="auth-modal">
+      <div class="auth-modal-content">
+          <span class="auth-modal-close" id="forgot-password-modal-close">&times;</span>
+          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Forgot Password</h5>
+          <form id="forgot-password-form" class="flex flex-col items-center space-y-4">
+              <input type="email" id="forgot-email" placeholder="Enter your email" required
+                     class="demo-input">
+              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
+                  Send Reset Link
+              </button>
+          </form>
+          <p id="forgot-password-message" class="mt-4 text-lg font-semibold text-center"></p>
+          <p class="text-center text-gray-500 dark:text-gray-400 mt-4"><a href="#" id="modal-back-to-login" class="text-accent hover:underline">Back to Login</a></p>
+      </div>
+  </div>
+
+  <!-- Reset Password Modal (appears when user clicks link from email) -->
+  <div id="reset-password-modal" class="auth-modal">
+      <div class="auth-modal-content">
+          <span class="auth-modal-close" id="reset-password-modal-close">&times;</span>
+          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Reset Your Password</h5>
+          <form id="reset-password-form" class="flex flex-col items-center space-y-4">
+              <input type="hidden" id="reset-email" value="">
+              <input type="hidden" id="reset-token" value="">
+              <input type="password" id="new-password" placeholder="New Password" required
+                     class="demo-input">
+              <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required
+                     class="demo-input">
+              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
+                  Reset Password
+              </button>
+          </form>
+          <p id="reset-password-message" class="mt-4 text-lg font-semibold text-center"></p>
+      </div>
+  </div>
+
+
+  <!-- Theme toggle script -->
+  <script>
+    const toggleBtn = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+    const moonIcon = document.getElementById('moon-icon');
+    const sunIcon = document.getElementById('sun-icon');
+
+    // Set initial icon based on current theme
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        htmlEl.classList.add('dark');
+        moonIcon.classList.remove('hidden');
+        sunIcon.classList.add('hidden');
+    } else {
+        htmlEl.classList.remove('dark');
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      htmlEl.classList.toggle('dark');
+      if (htmlEl.classList.contains('dark')) {
+        localStorage.theme = 'dark';
+        moonIcon.classList.remove('hidden');
+        sunIcon.classList.add('hidden');
+      } else {
+        localStorage.theme = 'light';
+        moonIcon.classList.add('hidden');
+        sunIcon.classList.remove('hidden');
+      }
+    });
+
+    // Intersection Observer for fade-in animations
+    const fadeInSections = document.querySelectorAll('.fade-in-section');
+
+    const observerOptions = {
+        root: null, /* viewport */
+        rootMargin: '0px',
+        threshold: 0.1 /* trigger when 10% of element is visible */
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target); // Stop observing once visible
+            }
+        });
+    }, observerOptions);
+
+    fadeInSections.forEach(section => {
+        observer.observe(section);
+    });
+
+    // Custom Modal for messages (replacing alert)
+    function showCustomModal(message, isSuccess = false) {
+        let modal = document.getElementById('custom-alert-modal');
+        const modalText = modal.querySelector('p');
+        const modalCloseBtn = modal.querySelector('#custom-alert-modal-close-btn');
+
+        modalText.textContent = message;
+        modalText.classList.remove('text-success', 'text-danger');
+        modalText.classList.add(isSuccess ? 'text-success' : 'text-danger');
+
+        modal.classList.remove('hidden'); // Ensure it's visible
+        // Animate in
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.querySelector('.transform').style.transform = 'scale(1)';
+        }, 10);
+
+        const closeHandler = () => {
+            // Animate out
+            modal.style.opacity = '0';
+            modal.querySelector('.transform').style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                modal.classList.add('hidden'); // Hide after transition
+            }, 300); // Match transition duration
+            modalCloseBtn.removeEventListener('click', closeHandler); // Clean up listener
+        };
+
+        modalCloseBtn.addEventListener('click', closeHandler);
+    }
+
+
+    // --- Authentication & Interactive Demo JS ---
+    const imageProcessingSection = document.getElementById('image-processing-section');
+    const imageProcessingStatus = document.getElementById('image-processing-status'); // New element for status messages
+
+    // Auth Modals
+    const registerModal = document.getElementById('register-modal');
+    const loginModal = document.getElementById('login-modal');
+    const forgotPasswordModal = document.getElementById('forgot-password-modal'); // New
+    const resetPasswordModal = document.getElementById('reset-password-modal'); // New
+
+    const registerModalClose = document.getElementById('register-modal-close');
+    const loginModalClose = document.getElementById('login-modal-close');
+    const forgotPasswordModalClose = document.getElementById('forgot-password-modal-close'); // New
+    const resetPasswordModalClose = document.getElementById('reset-password-modal-close'); // New
+
+    // Auth Forms within Modals
+    const registerForm = registerModal.querySelector('#register-form');
+    const registerEmailInput = document.getElementById('register-email');
+    const registerUsernameInput = document.getElementById('register-username'); // New username input
+    const registerPasswordInput = document.getElementById('register-password');
+    const registerMessage = document.getElementById('register-message');
+
+    const loginForm = loginModal.querySelector('#login-form');
+    const loginEmailInput = document.getElementById('login-email');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginMessage = document.getElementById('login-message');
+
+    const forgotPasswordForm = forgotPasswordModal.querySelector('#forgot-password-form'); // New
+    const forgotEmailInput = document.getElementById('forgot-email'); // New
+    const forgotPasswordMessage = document.getElementById('forgot-password-message'); // New
+
+    const resetPasswordForm = resetPasswordModal.querySelector('#reset-password-form'); // New
+    const resetEmailInput = document.getElementById('reset-email'); // New
+    const resetTokenInput = document.getElementById('reset-token'); // New
+    const newPasswordInput = document.getElementById('new-password'); // New
+    const confirmNewPasswordInput = document.getElementById('confirm-new-password'); // New
+    const resetPasswordMessage = document.getElementById('reset-password-message'); // New
+
+
+    // Navbar Auth Buttons
+    const navSignupBtn = document.getElementById('nav-signup-btn');
+    const navLoginBtn = document.getElementById('nav-login-btn');
+    const authNavButtons = document.getElementById('auth-nav-buttons'); // Container for signup/login buttons
+
+    // Navbar Logged-in Info
+    const loggedInNavInfo = document.getElementById('logged-in-nav-info'); // Container for welcome/logout
+    const navLoggedInUsernameSpan = document.getElementById('nav-logged-in-username'); // Changed to username
+    const navLogoutBtn = document.getElementById('nav-logout-btn');
+
+    // Links between modals
+    const modalShowLoginLink = document.getElementById('modal-show-login');
+    const modalShowRegisterLink = document.getElementById('modal-show-register');
+    const modalForgotPasswordLink = document.getElementById('modal-forgot-password'); // New
+    const modalBackToLoginLink = document.getElementById('modal-back-to-login'); // New
+
+
+    // Image Processing Demo Elements (already existing)
+    const fileInput = document.getElementById('file-upload');
+    const uploadForm = document.getElementById('upload-form');
+    const uploadResult = document.getElementById('upload-result');
+    const uploadSubmitBtn = document.getElementById('upload-submit-btn'); // Get the specific button
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const base64Input = document.getElementById('base64-input');
+    const loadingIndicator = document.getElementById('loading-indicator');
+    const clearImageBtn = document.getElementById('clear-image-btn');
+    const base64Form = document.getElementById('base64-form');
+    const base64Result = document.getElementById('base64-result');
+    const base64SubmitBtn = document.getElementById('base64-submit-btn'); // Get the specific button
+
+    const imageCounterDisplay = document.getElementById('image-counter-display');
+    const UNATUTH_IMAGE_LIMIT = 3; // Max images for unauthenticated users (changed from 8 to 3)
+    let unauthImageCount = parseInt(localStorage.getItem('unauthImageCount') || '0', 10);
+    let currentUserImageCount = 0; // For logged-in users, fetched from backend
+
+    // Image Modal Elements
+    const imageModal = document.getElementById('image-modal');
+    const modalImage = document.getElementById('modal-image');
+
+
+    function updateImageCounterDisplay() {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            // Logged in: show user's specific count
+            imageCounterDisplay.textContent = `Images Processed: ${currentUserImageCount}`;
+        } else {
+            // Not logged in: show unauthenticated count
+            const remaining = Math.max(0, UNATUTH_IMAGE_LIMIT - unauthImageCount);
+            imageCounterDisplay.textContent = `Free Attempts: ${remaining}/${UNATUTH_IMAGE_LIMIT}`;
+        }
+    }
+
+    // Function to update UI based on login status and image counts
+    function updateUI() {
+        const token = localStorage.getItem('access_token');
+        const userEmail = localStorage.getItem('email');
+        const username = localStorage.getItem('username'); // Get username from localStorage
+
+        if (token && userEmail && username) {
+            // User is logged in
+            authNavButtons.classList.add('hidden'); // Hide signup/login buttons
+            loggedInNavInfo.classList.remove('hidden'); // Show welcome/logout info
+            navLoggedInUsernameSpan.textContent = username; // Display username
+            // imageProcessingSection.classList.remove('hidden'); // Keep demo section visible for unauth use
+            
+            // Fetch initial image count for logged-in user from localStorage (set during login)
+            currentUserImageCount = parseInt(localStorage.getItem('image_count') || '0', 10);
+            updateImageCounterDisplay();
+
+            // Ensure buttons are enabled as authenticated users have no fixed limit here
+            uploadSubmitBtn.disabled = false;
+            base64SubmitBtn.disabled = false;
+            imageProcessingStatus.textContent = ''; // Clear unauth status message
+        } else {
+            // User is logged out
+            authNavButtons.classList.remove('hidden'); // Show signup/login buttons
+            loggedInNavInfo.classList.add('hidden'); // Hide welcome/logout info
+            navLoggedInUsernameSpan.textContent = ''; // Clear username
+            // imageProcessingSection.classList.remove('hidden'); // Keep demo section visible for unauth use
+
+            updateImageCounterDisplay(); // Update unauth counter display
+
+            // Check unauthenticated limit
+            if (unauthImageCount >= UNATUTH_IMAGE_LIMIT) {
+                uploadSubmitBtn.disabled = true;
+                base64SubmitBtn.disabled = true;
+                imageProcessingStatus.textContent = `You have used all ${UNATUTH_IMAGE_LIMIT} free attempts. Please log in or register to continue.`;
+                imageProcessingStatus.classList.add('text-danger');
+            } else {
+                uploadSubmitBtn.disabled = false;
+                base64SubmitBtn.disabled = false;
+                const remaining = UNATUTH_IMAGE_LIMIT - unauthImageCount;
+                imageProcessingStatus.textContent = `You have ${remaining} free attempts remaining.`;
+                imageProcessingStatus.classList.remove('text-danger');
+                imageProcessingStatus.classList.add('text-gray-600', 'dark:text-gray-400');
+            }
+        }
+    }
+
+    // Initial UI update on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateUI();
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('token') && urlParams.has('email') && window.location.pathname === '/reset-password') {
+            // User is coming from a password reset link
+            openModal(resetPasswordModal);
+            resetEmailInput.value = urlParams.get('email');
+            resetTokenInput.value = urlParams.get('token');
+        }
+    });
+
+
+    // --- Modal Control Functions ---
+    function openModal(modalElement) {
+        modalElement.classList.add('show');
+    }
+
+    function closeModal(modalElement) {
+        modalElement.classList.remove('show');
+        // Clear form fields and messages when closing
+        if (modalElement === registerModal) {
+            registerForm.reset();
+            registerMessage.textContent = '';
+            registerMessage.classList.remove('text-success', 'text-danger');
+        } else if (modalElement === loginModal) {
+            loginForm.reset();
+            loginMessage.textContent = '';
+            loginMessage.classList.remove('text-success', 'text-danger');
+        } else if (modalElement === forgotPasswordModal) {
+            forgotPasswordForm.reset();
+            forgotPasswordMessage.textContent = '';
+            forgotPasswordMessage.classList.remove('text-success', 'text-danger');
+        } else if (modalElement === resetPasswordModal) {
+            resetPasswordForm.reset();
+            resetPasswordMessage.textContent = '';
+            resetPasswordMessage.classList.remove('text-success', 'text-danger');
+            // Clear URL parameters for security after closing reset modal
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+
+    // --- Navbar Auth Button Event Listeners ---
+    navSignupBtn.addEventListener('click', () => {
+        closeModal(loginModal); // Close login if open
+        closeModal(forgotPasswordModal); // Close forgot password if open
+        openModal(registerModal);
+    });
+
+    navLoginBtn.addEventListener('click', () => {
+        closeModal(registerModal); // Close register if open
+        closeModal(forgotPasswordModal); // Close forgot password if open
+        openModal(loginModal);
+    });
+
+    // --- Modal Close Buttons ---
+    registerModalClose.addEventListener('click', () => closeModal(registerModal));
+    loginModalClose.addEventListener('click', () => closeModal(loginModal));
+    forgotPasswordModalClose.addEventListener('click', () => closeModal(forgotPasswordModal)); // New
+    resetPasswordModalClose.addEventListener('click', () => closeModal(resetPasswordModal)); // New
+
+    // Close modals if clicking outside content
+    registerModal.addEventListener('click', (e) => {
+        if (e.target === registerModal) closeModal(registerModal);
+    });
+    loginModal.addEventListener('click', (e) => {
+        if (e.target === loginModal) closeModal(loginModal);
+    });
+    forgotPasswordModal.addEventListener('click', (e) => { // New
+        if (e.target === forgotPasswordModal) closeModal(forgotPasswordModal);
+    });
+    resetPasswordModal.addEventListener('click', (e) => { // New
+        if (e.target === resetPasswordModal) closeModal(resetPasswordModal);
+    });
+
+
+    // --- Links between Modals ---
+    modalShowLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal(registerModal);
+        openModal(loginModal);
+    });
+
+    modalShowRegisterLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal(loginModal);
+        openModal(registerModal);
+    });
+
+    modalForgotPasswordLink.addEventListener('click', (e) => { // New
+        e.preventDefault();
+        closeModal(loginModal);
+        openModal(forgotPasswordModal);
+    });
+
+    modalBackToLoginLink.addEventListener('click', (e) => { // New
+        e.preventDefault();
+        closeModal(forgotPasswordModal);
+        openModal(loginModal);
+    });
+
+
+    // --- Authentication Form Handlers ---
+
+    // Register Form Submission
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        registerMessage.textContent = 'Registering...';
+        registerMessage.classList.remove('text-success', 'text-danger');
+
+        const email = registerEmailInput.value.trim();
+        const username = registerUsernameInput.value.trim(); // Get username
+        const password = registerPasswordInput.value.trim();
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, username, password }) // Send username
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                registerMessage.textContent = result.message || 'Registration successful!';
+                registerMessage.classList.add('text-success');
+                showCustomModal('Registration successful! Please check your email to verify your account, then log in.', true);
+                // Switch to login form after successful registration
+                closeModal(registerModal);
+                openModal(loginModal);
+                loginEmailInput.value = email; // Pre-fill email
+                loginPasswordInput.value = '';
+            } else {
+                registerMessage.textContent = result.detail || 'Registration failed.';
+                registerMessage.classList.add('text-danger');
+                showCustomModal(result.detail || 'Registration failed.', false);
+            }
+        } catch (error) {
+            console.error('Error during registration:', error);
+            registerMessage.textContent = 'An error occurred during registration.';
+            registerMessage.classList.add('text-danger');
+            showCustomModal('An error occurred during registration.', false);
+        }
+    });
+
+    // Login Form Submission
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginMessage.textContent = 'Logging in...';
+        loginMessage.classList.remove('text-success', 'text-danger');
+
+        const email = loginEmailInput.value.trim();
+        const password = loginPasswordInput.value.trim();
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('access_token', result.access_token);
+                localStorage.setItem('email', result.email);
+                localStorage.setItem('username', result.username); // Store username
+                localStorage.setItem('image_count', result.image_count); // Store user's image count
+                
+                currentUserImageCount = result.image_count; // Update global counter
+                loginMessage.textContent = 'Login successful!';
+                loginMessage.classList.add('text-success');
+                showCustomModal('Login successful!', true);
+                closeModal(loginModal); // Close login modal
+                updateUI(); // Update UI to show image processing section
+            } else {
+                loginMessage.textContent = result.detail || 'Login failed.';
+                loginMessage.classList.add('text-danger');
+                showCustomModal(result.detail || 'Login failed.', false);
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+            loginMessage.textContent = 'An error occurred during login.';
+            loginMessage.classList.add('text-danger');
+            showCustomModal('An error occurred during login.', false);
+        }
+    });
+
+    // Logout Button (in navbar)
+    navLogoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('email');
+        localStorage.removeItem('username'); // Remove username
+        localStorage.removeItem('image_count'); // Remove image count
+        showCustomModal('You have been logged out.', true);
+        updateUI(); // Update UI to show authentication forms
+    });
+
+    // Forgot Password Form Submission (New)
+    forgotPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        forgotPasswordMessage.textContent = 'Sending reset link...';
+        forgotPasswordMessage.classList.remove('text-success', 'text-danger');
+
+        const email = forgotEmailInput.value.trim();
+
+        try {
+            const response = await fetch('/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                forgotPasswordMessage.textContent = result.message || 'If an account with that email exists, a password reset link has been sent.';
+                forgotPasswordMessage.classList.add('text-success');
+                showCustomModal(result.message || 'If an account with that email exists, a password reset link has been sent.', true);
+                forgotPasswordForm.reset();
+                closeModal(forgotPasswordModal); // Close modal after sending link
+                openModal(loginModal); // Optionally, go back to login
+            } else {
+                forgotPasswordMessage.textContent = result.detail || 'Failed to send reset link.';
+                forgotPasswordMessage.classList.add('text-danger');
+                showCustomModal(result.detail || 'Failed to send reset link.', false);
+            }
+        } catch (error) {
+            console.error('Error during forgot password:', error);
+            forgotPasswordMessage.textContent = 'An error occurred. Please try again.';
+            forgotPasswordMessage.classList.add('text-danger');
+            showCustomModal('An error occurred. Please try again.', false);
+        }
+    });
+
+    // Reset Password Form Submission (New)
+    resetPasswordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        resetPasswordMessage.textContent = 'Resetting password...';
+        resetPasswordMessage.classList.remove('text-success', 'text-danger');
+
+        const email = resetEmailInput.value;
+        const token = resetTokenInput.value;
+        const newPassword = newPasswordInput.value;
+        const confirmNewPassword = confirmNewPasswordInput.value;
+
+        if (newPassword !== confirmNewPassword) {
+            resetPasswordMessage.textContent = 'Passwords do not match.';
+            resetPasswordMessage.classList.add('text-danger');
+            showCustomModal('Passwords do not match.', false);
+            return;
+        }
+
+        try {
+            const response = await fetch('/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, token, new_password: newPassword })
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+                resetPasswordMessage.textContent = result.message || 'Password reset successfully!';
+                resetPasswordMessage.classList.add('text-success');
+                showCustomModal('Password reset successfully! You can now log in.', true);
+                resetPasswordForm.reset();
+                closeModal(resetPasswordModal); // Close modal after successful reset
+                openModal(loginModal); // Go to login
+            } else {
+                resetPasswordMessage.textContent = result.detail || 'Password reset failed.';
+                resetPasswordMessage.classList.add('text-danger');
+                showCustomModal(result.detail || 'Password reset failed.', false);
+            }
+        } catch (error) {
+            console.error('Error during password reset:', error);
+            resetPasswordMessage.textContent = 'An error occurred during password reset.';
+            resetPasswordMessage.classList.add('text-danger');
+            showCustomModal('An error occurred during password reset.', false);
+        }
+    });
+
+
+    // --- Image Processing Demo Handlers (Modified to include Authorization header) ---
+
+    // Function to open the image modal
+    function openImageModal(imageUrl) {
+        modalImage.src = imageUrl;
+        imageModal.classList.add('show');
+    }
+
+    // Function to close the image modal
+    function closeImageModal() {
+        modalImage.src = ''; // Clear the image source
+        imageModal.classList.remove('show');
+    }
+
+    // Event listener to close modal when clicking outside or on the image
+    if (imageModal) {
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal || e.target === modalImage) {
+                closeImageModal();
+            }
+        });
+    }
+
+    // Function to handle image processing and display (for file input)
+    function processImage(file) {
+        if (file && file.type.startsWith('image/')) {
+            loadingIndicator.classList.remove('hidden');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                base64Input.value = e.target.result; // Populate base64 input
+                imagePreviewContainer.classList.remove('hidden');
+                loadingIndicator.classList.add('hidden');
+            };
+            reader.onerror = function() {
+                loadingIndicator.classList.add('hidden');
+                console.error("Error reading file.");
+                showCustomModal("Failed to read image file. Please try again.", false);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            showCustomModal("Please upload an image file.", false);
+        }
+    }
+
+    // Event Listener for File Input
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            processImage(e.target.files[0]);
+        }
+    });
+
+    // Event listener for clicking the image preview to open the modal
+    if (imagePreview) {
+        imagePreview.addEventListener('click', () => {
+            if (imagePreview.src && imagePreview.src !== window.location.href + '#') { // Ensure there's an image loaded
+                openImageModal(imagePreview.src);
+            }
+        });
+    }
+
+
+    // Clear Image Button
+    if (clearImageBtn) {
+        clearImageBtn.addEventListener('click', () => {
+            imagePreview.src = '#';
+            imagePreviewContainer.classList.add('hidden');
+            base64Input.value = '';
+            fileInput.value = ''; // Clear file input as well
+            base64Result.textContent = ''; // Clear result
+            uploadResult.textContent = ''; // Clear upload result as well
+            // Do NOT reset imageCounter on clear, only on successful processing
+        });
+    }
+
+    // Handle Base64 input changes to update preview if valid
+    if (base64Input) {
+        base64Input.addEventListener('input', () => {
+            const base64String = base64Input.value.trim();
+            if (base64String.startsWith('data:image/')) {
+                imagePreview.src = base64String;
+                imagePreviewContainer.classList.remove('hidden');
+            } else if (base64String === '') {
+                imagePreview.src = '#';
+                imagePreviewContainer.classList.add('hidden');
+            }
+        });
+    }
+
+    // Event listener for the base64-form submission
+    if (base64Form) {
+        base64Form.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const base64String = base64Input.value.trim();
+            if (!base64String) {
+                showCustomModal("Please paste a Base64 string to process.", false);
+                return;
+            }
+
+            base64Result.textContent = 'Processing Base64 string...';
+            base64Result.classList.remove('text-danger', 'text-success', 'result-fade-in'); // Clear previous status and animation
+
+            const token = localStorage.getItem('access_token');
+            
+            // Determine if authenticated or unauthenticated
+            let isAuth = !!token;
+            let currentCount = isAuth ? currentUserImageCount : unauthImageCount;
+            let limitReached = !isAuth && currentCount >= UNATUTH_IMAGE_LIMIT;
+
+            if (limitReached) {
+                showCustomModal(`You have used all ${UNATUTH_IMAGE_LIMIT} free attempts. Please log in or register to continue.`, false);
+                base64Result.textContent = '';
+                return;
+            }
+
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                let endpoint = '/base64-free'; // Default to free endpoint
+
+                if (isAuth) {
+                    headers['Authorization'] = `Bearer ${token}`; // Include the JWT token
+                    endpoint = '/base64'; // Use authenticated endpoint
+                }
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ base64_str: base64String })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) { // Check if the response status is 2xx
+                    base64Result.textContent = `AI response: ${result.text}`;
+                    base64Result.classList.add('text-success', 'result-fade-in'); // Add animation class
+                    
+                    if (isAuth) {
+                        currentUserImageCount = result.image_count; // Update from backend
+                        localStorage.setItem('image_count', currentUserImageCount);
+                    } else {
+                        unauthImageCount++; // Increment unauth count
+                        localStorage.setItem('unauthImageCount', unauthImageCount);
+                    }
+                    updateImageCounterDisplay(); // Update display
+                    updateUI(); // Re-check limits and update status message
+                } else {
+                    base64Result.textContent = `Processing failed: ${result.detail || result.error || 'Unknown error'}`;
+                    base64Result.classList.add('text-danger', 'result-fade-in'); // Add animation class even on error
+                    if (response.status === 401 || response.status === 403) { // Also check 403 for unverified
+                        showCustomModal(result.detail || "Authentication failed or token expired. Please log in again.", false);
+                        localStorage.removeItem('access_token'); // Clear invalid token
+                        localStorage.removeItem('email');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('image_count');
+                        updateUI(); // Redirect to login
+                    } else {
+                        showCustomModal(result.detail || result.error || 'Processing failed.', false);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error processing Base64 string:', error);
+                base64Result.textContent = 'Processing failed: An error occurred.';
+                base64Result.classList.add('text-danger', 'result-fade-in'); // Add animation class
+                showCustomModal('An error occurred during processing.', false);
+            }
+        });
+    }
+
+    // New: Event listener for the upload-form submission
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const file = fileInput.files[0];
+            if (!file) {
+                showCustomModal("Please select an image file to upload.", false);
+                return;
+            }
+
+            uploadResult.textContent = 'Processing uploaded image...';
+            uploadResult.classList.remove('text-danger', 'text-success', 'result-fade-in'); // Clear previous status and animation
+
+            const token = localStorage.getItem('access_token');
+            
+            // Determine if authenticated or unauthenticated
+            let isAuth = !!token;
+            let currentCount = isAuth ? currentUserImageCount : unauthImageCount;
+            let limitReached = !isAuth && currentCount >= UNATUTH_IMAGE_LIMIT;
+
+            if (limitReached) {
+                showCustomModal(`You have used all ${UNATUTH_IMAGE_LIMIT} free attempts. Please log in or register to continue.`, false);
+                uploadResult.textContent = '';
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const headers = {};
+                let endpoint = '/upload-free'; // Default to free endpoint
+                if (isAuth) {
+                    headers['Authorization'] = `Bearer ${token}`; // Include the JWT token
+                    endpoint = '/upload'; // Use authenticated endpoint
+                }
+                // Note: Content-Type for FormData is automatically set by the browser
+                // when you pass a FormData object as the body.
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) { // Check if the response status is 2xx
+                    if (result.plates && Array.isArray(result.plates) && result.plates.length > 0) {
+                        let plateTexts = result.plates.map(plate => plate.text).join(', ');
+                        uploadResult.textContent = `Detected Plates: ${plateTexts}`;
+                        uploadResult.classList.add('text-success', 'result-fade-in'); // Add animation class
+                        
+                        if (isAuth) {
+                            currentUserImageCount = result.image_count; // Update from backend
+                            localStorage.setItem('image_count', currentUserImageCount);
+                        } else {
+                            unauthImageCount++; // Increment unauth count
+                            localStorage.setItem('unauthImageCount', unauthImageCount);
+                        }
+                        updateImageCounterDisplay(); // Update display
+                        updateUI(); // Re-check limits and update status message
+                    } else {
+                        uploadResult.textContent = 'No plates detected or empty response.';
+                        uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class even on error
+                    }
+                } else {
+                    uploadResult.textContent = `Processing failed: ${result.detail || result.error || 'Unknown error'}`;
+                    uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class
+                    if (response.status === 401 || response.status === 403) { // Also check 403 for unverified
+                        showCustomModal(result.detail || "Authentication failed or token expired. Please log in again.", false);
+                        localStorage.removeItem('access_token'); // Clear invalid token
+                        localStorage.removeItem('email');
+                        localStorage.removeItem('username');
+                        localStorage.removeItem('image_count');
+                        updateUI(); // Redirect to login
+                    } else {
+                        showCustomModal(result.detail || result.error || 'Processing failed.', false);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error processing uploaded image:', error);
+                uploadResult.textContent = 'Processing failed: An error occurred.';
+                uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class
+                showCustomModal('An error occurred during processing.', false);
+            }
+        });
+    }
+
+    // Add button click effect
+    document.querySelectorAll('button, label[for="file-upload"]').forEach(button => {
+        button.addEventListener('mousedown', (e) => {
+            // Apply a generic active class for all buttons
+            e.currentTarget.classList.add('btn-active-effect');
+            // Apply specific glow for danger buttons
+            if (e.currentTarget.classList.contains('bg-danger')) {
+                e.currentTarget.classList.add('btn-danger-active-effect');
+            }
+        });
+        button.addEventListener('mouseup', (e) => {
+            e.currentTarget.classList.remove('btn-active-effect', 'btn-danger-active-effect');
+        });
+        button.addEventListener('mouseleave', (e) => {
+            e.currentTarget.classList.remove('btn-active-effect', 'btn-danger-active-effect');
+        });
+    });
+
+    // Home link functionality for Gem ANPR title
+    const homeLinkTitle = document.getElementById('home-link-title');
+    if (homeLinkTitle) {
+        homeLinkTitle.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+  </script>
+</body>
+</html>
