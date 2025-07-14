@@ -1,0 +1,17 @@
+# Ignore Python cache
+__pycache__/
+
+# Ignore user and token data files
+backend/users.json
+backend/token_blacklist.json
+
+# Ignore model files and outputs
+*.pt
+*.png
+
+# Ignore environment variables
+.env
+
+# Ignore system files
+.DS_Store
+Thumbs.db
