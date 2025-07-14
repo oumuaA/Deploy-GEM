@@ -93,6 +93,13 @@
         box-shadow: theme('boxShadow.button-danger') !important;
     }
 
+    /* NEW: Styling for disabled buttons */
+    .btn-base-style:disabled {
+        @apply opacity-50 cursor-not-allowed;
+        box-shadow: none !important; /* Remove shadow when disabled */
+        transform: none !important; /* Remove transform when disabled */
+    }
+
 
     /* Feature Card - Dynamic and elevated */
     .feature-card {
@@ -744,8 +751,6 @@
     const base64SubmitBtn = document.getElementById('base64-submit-btn'); // Get the specific button
 
     const imageCounterDisplay = document.getElementById('image-counter-display');
-    const UNATUTH_IMAGE_LIMIT = 3; // Max images for unauthenticated users (changed from 8 to 3)
-    let unauthImageCount = parseInt(localStorage.getItem('unauthImageCount') || '0', 10);
     let currentUserImageCount = 0; // For logged-in users, fetched from backend
 
     // Image Modal Elements
@@ -759,9 +764,9 @@
             // Logged in: show user's specific count
             imageCounterDisplay.textContent = `Images Processed: ${currentUserImageCount}`;
         } else {
-            // Not logged in: show unauthenticated count
-            const remaining = Math.max(0, UNATUTH_IMAGE_LIMIT - unauthImageCount);
-            imageCounterDisplay.textContent = `Free Attempts: ${remaining}/${UNATUTH_IMAGE_LIMIT}`;
+            // Not logged in: show a generic count or message for unauthenticated users
+            // For this version, we'll just show a generic "0" as there's no backend tracking for unauth
+            imageCounterDisplay.textContent = `Images Processed: 0`;
         }
     }
 
@@ -776,7 +781,6 @@
             authNavButtons.classList.add('hidden'); // Hide signup/login buttons
             loggedInNavInfo.classList.remove('hidden'); // Show welcome/logout info
             navLoggedInUsernameSpan.textContent = username; // Display username
-            // imageProcessingSection.classList.remove('hidden'); // Keep demo section visible for unauth use
             
             // Fetch initial image count for logged-in user from localStorage (set during login)
             currentUserImageCount = parseInt(localStorage.getItem('image_count') || '0', 10);
@@ -784,31 +788,27 @@
 
             // Ensure buttons are enabled as authenticated users have no fixed limit here
             uploadSubmitBtn.disabled = false;
+            uploadSubmitBtn.textContent = 'Process Uploaded Image'; // Restore text
             base64SubmitBtn.disabled = false;
-            imageProcessingStatus.textContent = ''; // Clear unauth status message
+            base64SubmitBtn.textContent = 'Process Base64 String'; // Restore text
+
+            imageProcessingStatus.textContent = ''; // Clear status message
         } else {
             // User is logged out
             authNavButtons.classList.remove('hidden'); // Show signup/login buttons
             loggedInNavInfo.classList.add('hidden'); // Hide welcome/logout info
             navLoggedInUsernameSpan.textContent = ''; // Clear username
-            // imageProcessingSection.classList.remove('hidden'); // Keep demo section visible for unauth use
+            
+            updateImageCounterDisplay(); // Update unauth counter display (will show 0)
 
-            updateImageCounterDisplay(); // Update unauth counter display
-
-            // Check unauthenticated limit
-            if (unauthImageCount >= UNATUTH_IMAGE_LIMIT) {
-                uploadSubmitBtn.disabled = true;
-                base64SubmitBtn.disabled = true;
-                imageProcessingStatus.textContent = `You have used all ${UNATUTH_IMAGE_LIMIT} free attempts. Please log in or register to continue.`;
-                imageProcessingStatus.classList.add('text-danger');
-            } else {
-                uploadSubmitBtn.disabled = false;
-                base64SubmitBtn.disabled = false;
-                const remaining = UNATUTH_IMAGE_LIMIT - unauthImageCount;
-                imageProcessingStatus.textContent = `You have ${remaining} free attempts remaining.`;
-                imageProcessingStatus.classList.remove('text-danger');
-                imageProcessingStatus.classList.add('text-gray-600', 'dark:text-gray-400');
-            }
+            // Buttons are always enabled for unauthenticated users as there's no backend limit
+            uploadSubmitBtn.disabled = false;
+            uploadSubmitBtn.textContent = 'Process Uploaded Image';
+            base64SubmitBtn.disabled = false;
+            base64SubmitBtn.textContent = 'Process Base64 String';
+            imageProcessingStatus.textContent = `You are using the free, unauthenticated service.`;
+            imageProcessingStatus.classList.remove('text-danger');
+            imageProcessingStatus.classList.add('text-gray-600', 'dark:text-gray-400');
         }
     }
 
@@ -816,11 +816,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         updateUI();
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('token') && urlParams.has('email') && window.location.pathname === '/reset-password') {
+        if (urlParams.has('token') && window.location.pathname === '/reset-password-form') {
             // User is coming from a password reset link
             openModal(resetPasswordModal);
-            resetEmailInput.value = urlParams.get('email');
             resetTokenInput.value = urlParams.get('token');
+            // Email input is not pre-filled from URL for security, user will re-enter
         }
     });
 
@@ -966,10 +966,14 @@
         const password = loginPasswordInput.value.trim();
 
         try {
-            const response = await fetch('/login', {
+            // Note: The backend /token endpoint expects 'username' and 'password'.
+            // Here, we're using 'email' from the form as 'username' for the backend.
+            // You might want to adjust your backend's /token endpoint to accept 'email' directly,
+            // or ensure the user logs in with their chosen username.
+            const response = await fetch('/token', { // Changed to /token as per backend
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ username: email, password: password }) // Sending email as username for login
             });
             const result = await response.json();
 
@@ -999,13 +1003,39 @@
     });
 
     // Logout Button (in navbar)
-    navLogoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('email');
-        localStorage.removeItem('username'); // Remove username
-        localStorage.removeItem('image_count'); // Remove image count
-        showCustomModal('You have been logged out.', true);
-        updateUI(); // Update UI to show authentication forms
+    navLogoutBtn.addEventListener('click', async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                console.warn("No access token found to logout.");
+                showCustomModal('You are already logged out.', true);
+                return;
+            }
+
+            const response = await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showCustomModal(result.message || 'You have been logged out.', true);
+            } else {
+                showCustomModal(result.detail || 'Logout failed.', false);
+            }
+        } catch (error) {
+            console.error('Error during logout:', error);
+            showCustomModal('An error occurred during logout.', false);
+        } finally {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('email');
+            localStorage.removeItem('username'); // Remove username
+            localStorage.removeItem('image_count'); // Remove image count
+            updateUI(); // Update UI to show authentication forms
+        }
     });
 
     // Forgot Password Form Submission (New)
@@ -1017,10 +1047,10 @@
         const email = forgotEmailInput.value.trim();
 
         try {
-            const response = await fetch('/forgot-password', {
+            const response = await fetch('/request-password-reset', { // Changed endpoint
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email: email }) // Send email directly
             });
             const result = await response.json();
 
@@ -1050,7 +1080,6 @@
         resetPasswordMessage.textContent = 'Resetting password...';
         resetPasswordMessage.classList.remove('text-success', 'text-danger');
 
-        const email = resetEmailInput.value;
         const token = resetTokenInput.value;
         const newPassword = newPasswordInput.value;
         const confirmNewPassword = confirmNewPasswordInput.value;
@@ -1066,7 +1095,7 @@
             const response = await fetch('/reset-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, token, new_password: newPassword })
+                body: JSON.stringify({ token: token, new_password: newPassword })
             });
             const result = await response.json();
 
@@ -1117,6 +1146,7 @@
     // Function to handle image processing and display (for file input)
     function processImage(file) {
         if (file && file.type.startsWith('image/')) {
+            console.log('File selected:', file.name);
             loadingIndicator.classList.remove('hidden');
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1124,6 +1154,7 @@
                 base64Input.value = e.target.result; // Populate base64 input
                 imagePreviewContainer.classList.remove('hidden');
                 loadingIndicator.classList.add('hidden');
+                console.log('Image preview updated and base64 input populated.');
             };
             reader.onerror = function() {
                 loadingIndicator.classList.add('hidden');
@@ -1138,6 +1169,7 @@
 
     // Event Listener for File Input
     fileInput.addEventListener('change', (e) => {
+        console.log('File input change detected.');
         if (e.target.files.length > 0) {
             processImage(e.target.files[0]);
         }
@@ -1156,6 +1188,7 @@
     // Clear Image Button
     if (clearImageBtn) {
         clearImageBtn.addEventListener('click', () => {
+            console.log('Clear Image button clicked.');
             imagePreview.src = '#';
             imagePreviewContainer.classList.add('hidden');
             base64Input.value = '';
@@ -1184,36 +1217,41 @@
     if (base64Form) {
         base64Form.addEventListener('submit', async (e) => {
             e.preventDefault(); // Prevent default form submission
+            console.log('Base64 form submitted.');
 
             const base64String = base64Input.value.trim();
             if (!base64String) {
                 showCustomModal("Please paste a Base64 string to process.", false);
+                console.log('Base64 string is empty.');
                 return;
             }
 
             base64Result.textContent = 'Processing Base64 string...';
             base64Result.classList.remove('text-danger', 'text-success', 'result-fade-in'); // Clear previous status and animation
 
+            // Show loading state
+            base64SubmitBtn.disabled = true;
+            base64SubmitBtn.textContent = 'Processing...';
+            loadingIndicator.classList.remove('hidden');
+            console.log('Base64 processing initiated: loading state active.');
+
+
             const token = localStorage.getItem('access_token');
             
             // Determine if authenticated or unauthenticated
             let isAuth = !!token;
-            let currentCount = isAuth ? currentUserImageCount : unauthImageCount;
-            let limitReached = !isAuth && currentCount >= UNATUTH_IMAGE_LIMIT;
-
-            if (limitReached) {
-                showCustomModal(`You have used all ${UNATUTH_IMAGE_LIMIT} free attempts. Please log in or register to continue.`, false);
-                base64Result.textContent = '';
-                return;
+            let endpoint = '';
+            if (isAuth) {
+                endpoint = '/base64-process'; // Authenticated endpoint
+            } else {
+                endpoint = '/base64-free'; // Unauthenticated endpoint
             }
+            console.log(`Sending Base64 request to ${endpoint}`);
 
             try {
                 const headers = { 'Content-Type': 'application/json' };
-                let endpoint = '/base64-free'; // Default to free endpoint
-
                 if (isAuth) {
                     headers['Authorization'] = `Bearer ${token}`; // Include the JWT token
-                    endpoint = '/base64'; // Use authenticated endpoint
                 }
 
                 const response = await fetch(endpoint, {
@@ -1223,6 +1261,7 @@
                 });
 
                 const result = await response.json();
+                console.log('Base64 response received:', result);
 
                 if (response.ok) { // Check if the response status is 2xx
                     base64Result.textContent = `AI response: ${result.text}`;
@@ -1231,12 +1270,10 @@
                     if (isAuth) {
                         currentUserImageCount = result.image_count; // Update from backend
                         localStorage.setItem('image_count', currentUserImageCount);
-                    } else {
-                        unauthImageCount++; // Increment unauth count
-                        localStorage.setItem('unauthImageCount', unauthImageCount);
                     }
                     updateImageCounterDisplay(); // Update display
                     updateUI(); // Re-check limits and update status message
+                    console.log('Base64 processing successful.');
                 } else {
                     base64Result.textContent = `Processing failed: ${result.detail || result.error || 'Unknown error'}`;
                     base64Result.classList.add('text-danger', 'result-fade-in'); // Add animation class even on error
@@ -1250,6 +1287,7 @@
                     } else {
                         showCustomModal(result.detail || result.error || 'Processing failed.', false);
                     }
+                    console.error('Base64 processing failed:', result.detail || result.error || 'Unknown error');
                 }
 
             } catch (error) {
@@ -1257,46 +1295,57 @@
                 base64Result.textContent = 'Processing failed: An error occurred.';
                 base64Result.classList.add('text-danger', 'result-fade-in'); // Add animation class
                 showCustomModal('An error occurred during processing.', false);
+            } finally {
+                // Always hide loading state and re-enable button
+                base64SubmitBtn.disabled = false;
+                base64SubmitBtn.textContent = 'Process Base64 String';
+                loadingIndicator.classList.add('hidden');
+                console.log('Base64 processing finished: loading state removed.');
             }
         });
     }
 
-    // New: Event listener for the upload-form submission
+    // Event listener for the upload-form submission
     if (uploadForm) {
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault(); // Prevent default form submission
+            console.log('Upload form submitted.');
 
             const file = fileInput.files[0];
             if (!file) {
                 showCustomModal("Please select an image file to upload.", false);
+                console.log('No file selected for upload.');
                 return;
             }
 
             uploadResult.textContent = 'Processing uploaded image...';
             uploadResult.classList.remove('text-danger', 'text-success', 'result-fade-in'); // Clear previous status and animation
 
+            // Show loading state
+            uploadSubmitBtn.disabled = true;
+            uploadSubmitBtn.textContent = 'Uploading...';
+            loadingIndicator.classList.remove('hidden');
+            console.log('Image upload processing initiated: loading state active.');
+
             const token = localStorage.getItem('access_token');
             
             // Determine if authenticated or unauthenticated
             let isAuth = !!token;
-            let currentCount = isAuth ? currentUserImageCount : unauthImageCount;
-            let limitReached = !isAuth && currentCount >= UNATUTH_IMAGE_LIMIT;
-
-            if (limitReached) {
-                showCustomModal(`You have used all ${UNATUTH_IMAGE_LIMIT} free attempts. Please log in or register to continue.`, false);
-                uploadResult.textContent = '';
-                return;
+            let endpoint = '';
+            if (isAuth) {
+                endpoint = '/image-upload'; // Authenticated endpoint
+            } else {
+                endpoint = '/image-upload-free'; // Unauthenticated endpoint
             }
+            console.log(`Sending image upload request to ${endpoint}`);
 
             try {
                 const formData = new FormData();
                 formData.append('file', file);
 
                 const headers = {};
-                let endpoint = '/upload-free'; // Default to free endpoint
                 if (isAuth) {
                     headers['Authorization'] = `Bearer ${token}`; // Include the JWT token
-                    endpoint = '/upload'; // Use authenticated endpoint
                 }
                 // Note: Content-Type for FormData is automatically set by the browser
                 // when you pass a FormData object as the body.
@@ -1308,26 +1357,19 @@
                 });
 
                 const result = await response.json();
+                console.log('Image upload response received:', result);
 
                 if (response.ok) { // Check if the response status is 2xx
-                    if (result.plates && Array.isArray(result.plates) && result.plates.length > 0) {
-                        let plateTexts = result.plates.map(plate => plate.text).join(', ');
-                        uploadResult.textContent = `Detected Plates: ${plateTexts}`;
-                        uploadResult.classList.add('text-success', 'result-fade-in'); // Add animation class
-                        
-                        if (isAuth) {
-                            currentUserImageCount = result.image_count; // Update from backend
-                            localStorage.setItem('image_count', currentUserImageCount);
-                        } else {
-                            unauthImageCount++; // Increment unauth count
-                            localStorage.setItem('unauthImageCount', unauthImageCount);
-                        }
-                        updateImageCounterDisplay(); // Update display
-                        updateUI(); // Re-check limits and update status message
-                    } else {
-                        uploadResult.textContent = 'No plates detected or empty response.';
-                        uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class even on error
+                    uploadResult.textContent = `AI response: ${result.text}`;
+                    uploadResult.classList.add('text-success', 'result-fade-in'); // Add animation class
+                    
+                    if (isAuth) {
+                        currentUserImageCount = result.image_count; // Update from backend
+                        localStorage.setItem('image_count', currentUserImageCount);
                     }
+                    updateImageCounterDisplay(); // Update display
+                    updateUI(); // Re-check limits and update status message
+                    console.log('Image upload successful.');
                 } else {
                     uploadResult.textContent = `Processing failed: ${result.detail || result.error || 'Unknown error'}`;
                     uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class
@@ -1341,6 +1383,7 @@
                     } else {
                         showCustomModal(result.detail || result.error || 'Processing failed.', false);
                     }
+                    console.error('Image upload failed:', result.detail || result.error || 'Unknown error');
                 }
 
             } catch (error) {
@@ -1348,6 +1391,12 @@
                 uploadResult.textContent = 'Processing failed: An error occurred.';
                 uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class
                 showCustomModal('An error occurred during processing.', false);
+            } finally {
+                // Always hide loading state and re-enable button
+                uploadSubmitBtn.disabled = false;
+                uploadSubmitBtn.textContent = 'Process Uploaded Image';
+                loadingIndicator.classList.add('hidden');
+                console.log('Image upload finished: loading state removed.');
             }
         });
     }
