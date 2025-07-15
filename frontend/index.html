@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gem ANPR - Auth & Image Processing</title>
+  <title>Gem ANPR - Image Processing</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -341,29 +341,11 @@
         </div>
       </div>
 
-      <!-- Right Section: Navigation Links & Auth Buttons -->
+      <!-- Right Section: Navigation Links (Auth buttons removed) -->
       <nav class="flex items-center space-x-6 text-sm font-semibold">
         <a href="#interactive-demo" class="hover:text-accent transition">Demo</a>
         <a href="#pricing" class="hover:text-accent transition">Pricing</a>
         <a href="#contact" class="hover:text-accent transition">Contact</a>
-
-        <!-- Auth Buttons (visible when logged out) -->
-        <div id="auth-nav-buttons" class="flex items-center space-x-4">
-            <button id="nav-signup-btn" class="btn-base-style !w-auto py-2 px-4 text-sm btn-primary-theme btn-hover-effect">
-                Sign Up
-            </button>
-            <button id="nav-login-btn" class="btn-base-style !w-auto py-2 px-4 text-sm btn-primary-theme btn-hover-effect">
-                Login
-            </button>
-        </div>
-
-        <!-- Logged-in User Info (visible when logged in) -->
-        <div id="logged-in-nav-info" class="hidden flex items-center space-x-4">
-            <span class="text-text-light dark:text-text-dark text-sm font-semibold">Welcome, <span id="nav-logged-in-username" class="text-accent"></span>!</span>
-            <button id="nav-logout-btn" class="btn-base-style !w-auto py-2 px-4 text-sm btn-danger-theme btn-hover-effect">
-                Logout
-            </button>
-        </div>
       </nav>
     </div>
   </header>
@@ -413,68 +395,62 @@
     </div>
   </section>
 
-    <!-- Interactive Demo Section (Trial Section) -->
+    <!-- Interactive Demo Section (Image & Base64 Processing) -->
     <section id="interactive-demo" class="py-40 px-4 bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark fade-in-section">
         <div class="container mx-auto max-w-5xl">
-            <h3 class="text-5xl font-extrabold text-center mb-28 text-text-light dark:text-text-dark">Test QuantumScan AI Now!</h3>
+            <h3 class="text-5xl font-extrabold text-center mb-28 text-text-light dark:text-text-dark">Process Your Image Now!</h3>
             <div class="demo-card p-12 rounded-3xl shadow-card-light dark:shadow-card-dark border border-border-light dark:border-border-dark bg-secondary-light dark:bg-secondary-dark space-y-10">
                 <p class="text-xl text-gray-600 dark:text-gray-400 text-center mb-8 font-light">Upload an image or paste a Base64 string to see our AI in action.</p>
 
-                <!-- Image Processing Section (Hidden by default, shown after login) -->
-                <div id="image-processing-section" class="space-y-10">
-                    <h4 class="text-3xl font-bold text-center text-accent mb-6">Image Processing Tools</h4>
-                    <p id="image-processing-status" class="text-lg text-center font-medium text-gray-600 dark:text-gray-400 mb-4"></p>
-
-                    <div id="input-sections-container" class="grid grid-cols-1 md:grid-cols-3 justify-center items-stretch gap-10">
-                        <!-- File Input -->
-                        <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
-                            <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Upload Image (File Input)</h4>
-                            <form id="upload-form" class="flex flex-col items-center space-y-6">
-                                <label for="file-upload" class="relative cursor-pointer inline-flex items-center justify-center w-full
-                                        btn-base-style btn-primary-theme btn-hover-effect">
-                                    <span>Choose File</span>
-                                    <input id="file-upload" type="file" name="file" class="sr-only" accept="image/*">
-                                </label>
-                                <div class="form-button-container w-full">
-                                    <button type="submit" id="upload-submit-btn" class="btn-base-style btn-primary-theme btn-hover-effect !w-auto px-10">
-                                        Process Uploaded Image
-                                    </button>
-                                </div>
-                                <p id="upload-result" class="mt-4 text-lg font-semibold text-center text-success"></p>
-                            </form>
-                        </div>
-
-                        <!-- Image Preview Section - Moved here -->
-                        <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
-                            <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Image Preview</h4>
-                            <div id="loading-indicator" class="hidden text-center text-accent font-medium mt-4">
-                                Processing<span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+                <div id="input-sections-container" class="grid grid-cols-1 md:grid-cols-3 justify-center items-stretch gap-10">
+                    <!-- File Input -->
+                    <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
+                        <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Upload Image (File Input)</h4>
+                        <form id="upload-form" class="flex flex-col items-center space-y-6">
+                            <label for="file-upload" class="relative cursor-pointer inline-flex items-center justify-center w-full
+                                    btn-base-style btn-primary-theme btn-hover-effect">
+                                <span>Choose File</span>
+                                <input id="file-upload" type="file" name="file" class="sr-only" accept="image/*">
+                            </label>
+                            <div class="form-button-container w-full">
+                                <button type="submit" id="upload-submit-btn" class="btn-base-style btn-primary-theme btn-hover-effect !w-auto px-10">
+                                    Process Uploaded Image
+                                </button>
                             </div>
-                            <div id="image-preview-container" class="hidden mt-4 space-y-6">
-                                <img id="image-preview" src="#" alt="Image Preview" class="max-w-full h-auto rounded-lg shadow-md mx-auto border border-border-light dark:border-border-dark cursor-pointer">
-                                <div class="flex justify-center">
-                                    <button id="clear-image-btn" class="
-                                            btn-base-style btn-danger-theme btn-hover-effect">
-                                        Clear Image
-                                    </button>
-                                </div>
+                            <p id="upload-result" class="mt-4 text-lg font-semibold text-center text-success"></p>
+                        </form>
+                    </div>
+
+                    <!-- Image Preview Section -->
+                    <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
+                        <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Image Preview</h4>
+                        <div id="loading-indicator" class="hidden text-center text-accent font-medium mt-4">
+                            Processing<span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>
+                        </div>
+                        <div id="image-preview-container" class="hidden mt-4 space-y-6">
+                            <img id="image-preview" src="#" alt="Image Preview" class="max-w-full h-auto rounded-lg shadow-md mx-auto border border-border-light dark:border-border-dark cursor-pointer">
+                            <div class="flex justify-center">
+                                <button id="clear-image-btn" class="
+                                        btn-base-style btn-danger-theme btn-hover-effect">
+                                    Clear Image
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Base64 Input Section - Always visible now -->
-                        <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
-                            <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Submit Base64 String</h4>
-                            <form id="base64-form" class="flex flex-col items-center space-y-6">
-                                <textarea id="base64-input" name="base64_str" rows="10" placeholder="Paste base64 string here or it will be populated from image upload..."
-                                          class="demo-input resize-y min-h-[150px]"></textarea>
-                                <div class="form-button-container w-full">
-                                    <button type="submit" id="base64-submit-btn" class="btn-base-style btn-primary-theme btn-hover-effect !w-auto px-10">
-                                        Process Base64 String
-                                    </button>
-                                </div>
-                            </form>
-                            <p id="base64-result" class="mt-4 text-lg font-semibold text-center text-success"></p>
-                        </div>
+                    <!-- Base64 Input Section -->
+                    <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
+                        <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Submit Base64 String</h4>
+                        <form id="base64-form" class="flex flex-col items-center space-y-6">
+                            <textarea id="base64-input" name="base64_str" rows="10" placeholder="Paste base64 string here or it will be populated from image upload..."
+                                      class="demo-input resize-y min-h-[150px]"></textarea>
+                            <div class="form-button-container w-full">
+                                <button type="submit" id="base64-submit-btn" class="btn-base-style btn-primary-theme btn-hover-effect !w-auto px-10">
+                                    Process Base64 String
+                                </button>
+                            </div>
+                        </form>
+                        <p id="base64-result" class="mt-4 text-lg font-semibold text-center text-success"></p>
                     </div>
                 </div>
             </div>
@@ -517,86 +493,6 @@
       </div>
   </div>
 
-  <!-- Register Modal -->
-  <div id="register-modal" class="auth-modal">
-      <div class="auth-modal-content">
-          <span class="auth-modal-close" id="register-modal-close">&times;</span>
-          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Register Account</h5>
-          <form id="register-form" class="flex flex-col items-center space-y-4">
-              <input type="email" id="register-email" placeholder="Email" required
-                     class="demo-input">
-              <input type="text" id="register-username" placeholder="Username" required
-                     class="demo-input">
-              <input type="password" id="register-password" placeholder="Password" required
-                     class="demo-input">
-              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
-                  Register
-              </button>
-          </form>
-          <p id="register-message" class="mt-4 text-lg font-semibold text-center"></p>
-          <p class="text-center text-gray-500 dark:text-gray-400 mt-4">Already have an account? <a href="#" id="modal-show-login" class="text-accent hover:underline">Login here</a></p>
-      </div>
-  </div>
-
-  <!-- Login Modal -->
-  <div id="login-modal" class="auth-modal">
-      <div class="auth-modal-content">
-          <span class="auth-modal-close" id="login-modal-close">&times;</span>
-          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Login to Your Account</h5>
-          <form id="login-form" class="flex flex-col items-center space-y-4">
-              <input type="email" id="login-email" placeholder="Email" required
-                     class="demo-input">
-              <input type="password" id="login-password" placeholder="Password" required
-                     class="demo-input">
-              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
-                  Login
-              </button>
-          </form>
-          <p id="login-message" class="mt-4 text-lg font-semibold text-center"></p>
-          <p class="text-center text-gray-500 dark:text-gray-400 mt-4">Don't have an account? <a href="#" id="modal-show-register" class="text-accent hover:underline">Register here</a></p>
-          <p class="text-center text-gray-500 dark:text-gray-400 mt-4"><a href="#" id="modal-forgot-password" class="text-accent hover:underline">Forgot Password?</a></p>
-      </div>
-  </div>
-
-  <!-- Forgot Password Modal -->
-  <div id="forgot-password-modal" class="auth-modal">
-      <div class="auth-modal-content">
-          <span class="auth-modal-close" id="forgot-password-modal-close">&times;</span>
-          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Forgot Password</h5>
-          <form id="forgot-password-form" class="flex flex-col items-center space-y-4">
-              <input type="email" id="forgot-email" placeholder="Enter your email" required
-                     class="demo-input">
-              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
-                  Send Reset Link
-              </button>
-          </form>
-          <p id="forgot-password-message" class="mt-4 text-lg font-semibold text-center"></p>
-          <p class="text-center text-gray-500 dark:text-gray-400 mt-4"><a href="#" id="modal-back-to-login" class="text-accent hover:underline">Back to Login</a></p>
-      </div>
-  </div>
-
-  <!-- Reset Password Modal (appears when user clicks link from email) -->
-  <div id="reset-password-modal" class="auth-modal">
-      <div class="auth-modal-content">
-          <span class="auth-modal-close" id="reset-password-modal-close">&times;</span>
-          <h5 class="text-2xl font-semibold text-text-light dark:text-text-dark text-center mb-6">Reset Your Password</h5>
-          <form id="reset-password-form" class="flex flex-col items-center space-y-4">
-              <input type="hidden" id="reset-email" value="">
-              <input type="hidden" id="reset-token" value="">
-              <input type="password" id="new-password" placeholder="New Password" required
-                     class="demo-input">
-              <input type="password" id="confirm-new-password" placeholder="Confirm New Password" required
-                     class="demo-input">
-              <button type="submit" class="w-full btn-base-style btn-primary-theme btn-hover-effect">
-                  Reset Password
-              </button>
-          </form>
-          <p id="reset-password-message" class="mt-4 text-lg font-semibold text-center"></p>
-      </div>
-  </div>
-
-
-  <!-- Theme toggle script -->
   <script>
     const toggleBtn = document.getElementById('theme-toggle');
     const htmlEl = document.documentElement;
@@ -679,68 +575,7 @@
         modalCloseBtn.addEventListener('click', closeHandler);
     }
 
-
-    // --- Authentication & Interactive Demo JS ---
-    const imageProcessingSection = document.getElementById('image-processing-section');
-    const imageProcessingStatus = document.getElementById('image-processing-status'); // New element for status messages
-
-    // Auth Modals
-    const registerModal = document.getElementById('register-modal');
-    const loginModal = document.getElementById('login-modal');
-    const forgotPasswordModal = document.getElementById('forgot-password-modal'); // New
-    const resetPasswordModal = document.getElementById('reset-password-modal'); // New
-
-    const registerModalClose = document.getElementById('register-modal-close');
-    const loginModalClose = document.getElementById('login-modal-close');
-    const forgotPasswordModalClose = document.getElementById('forgot-password-modal-close'); // New
-    const resetPasswordModalClose = document.getElementById('reset-password-modal-close'); // New
-
-    // Auth Forms within Modals
-    const registerForm = registerModal.querySelector('#register-form');
-    const registerEmailInput = document.getElementById('register-email');
-    const registerUsernameInput = document.getElementById('register-username'); // New username input
-    const registerPasswordInput = document.getElementById('register-password');
-    const registerMessage = document.getElementById('register-message');
-
-    const loginForm = loginModal.querySelector('#login-form');
-    const loginEmailInput = document.getElementById('login-email');
-    const loginPasswordInput = document.getElementById('login-password');
-    const loginMessage = document.getElementById('login-message');
-
-    const forgotPasswordForm = forgotPasswordModal.querySelector('#forgot-password-form'); // New
-    const forgotEmailInput = document.getElementById('forgot-email'); // New
-    const forgotPasswordMessage = document.getElementById('forgot-password-message'); // New
-
-    const resetPasswordForm = resetPasswordModal.querySelector('#reset-password-form'); // New
-    const resetEmailInput = document.getElementById('reset-email'); // New
-    const resetTokenInput = document.getElementById('reset-token'); // New
-    const newPasswordInput = document.getElementById('new-password'); // New
-    const confirmNewPasswordInput = document.getElementById('confirm-new-password'); // New
-    const resetPasswordMessage = document.getElementById('reset-password-message'); // New
-
-
-    // Navbar Auth Buttons
-    const navSignupBtn = document.getElementById('nav-signup-btn');
-    const navLoginBtn = document.getElementById('nav-login-btn');
-    const authNavButtons = document.getElementById('auth-nav-buttons'); // Container for signup/login buttons
-
-    // Navbar Logged-in Info
-    const loggedInNavInfo = document.getElementById('logged-in-nav-info'); // Container for welcome/logout
-    const navLoggedInUsernameSpan = document.getElementById('nav-logged-in-username'); // Changed to username
-    const navLogoutBtn = document.getElementById('nav-logout-btn');
-
-    // Links between modals
-    const modalShowLoginLink = document.getElementById('modal-show-login');
-    const modalShowRegisterLink = document.getElementById('modal-show-register');
-    const modalForgotPasswordLink = document.getElementById('modal-forgot-password'); // New
-    const modalBackToLoginLink = document.getElementById('modal-back-to-login'); // New
-
-
-    // Image Processing Demo Elements (already existing)
-    const fileInput = document.getElementById('file-upload');
-    const uploadForm = document.getElementById('upload-form');
-    const uploadResult = document.getElementById('upload-result');
-    const uploadSubmitBtn = document.getElementById('upload-submit-btn'); // Get the specific button
+    // Image Processing Demo Elements
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
     const base64Input = document.getElementById('base64-input');
@@ -748,379 +583,29 @@
     const clearImageBtn = document.getElementById('clear-image-btn');
     const base64Form = document.getElementById('base64-form');
     const base64Result = document.getElementById('base64-result');
-    const base64SubmitBtn = document.getElementById('base64-submit-btn'); // Get the specific button
+    const base64SubmitBtn = document.getElementById('base64-submit-btn');
 
-    const imageCounterDisplay = document.getElementById('image-counter-display');
-    let currentUserImageCount = 0; // For logged-in users, fetched from backend
+    // File Upload Elements
+    const fileInput = document.getElementById('file-upload');
+    const uploadForm = document.getElementById('upload-form');
+    const uploadResult = document.getElementById('upload-result');
+    const uploadSubmitBtn = document.getElementById('upload-submit-btn');
 
     // Image Modal Elements
     const imageModal = document.getElementById('image-modal');
     const modalImage = document.getElementById('modal-image');
 
+    // Image Counter Display
+    const imageCounterDisplay = document.getElementById('image-counter-display');
+    let totalImagesProcessed = 0; // Client-side counter
 
     function updateImageCounterDisplay() {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-            // Logged in: show user's specific count
-            imageCounterDisplay.textContent = `Images Processed: ${currentUserImageCount}`;
-        } else {
-            // Not logged in: show a generic count or message for unauthenticated users
-            // For this version, we'll just show a generic "0" as there's no backend tracking for unauth
-            imageCounterDisplay.textContent = `Images Processed: 0`;
-        }
+        imageCounterDisplay.textContent = `Images Processed: ${totalImagesProcessed}`;
     }
 
-    // Function to update UI based on login status and image counts
-    function updateUI() {
-        const token = localStorage.getItem('access_token');
-        const userEmail = localStorage.getItem('email');
-        const username = localStorage.getItem('username'); // Get username from localStorage
+    // Initial update of the counter
+    document.addEventListener('DOMContentLoaded', updateImageCounterDisplay);
 
-        if (token && userEmail && username) {
-            // User is logged in
-            authNavButtons.classList.add('hidden'); // Hide signup/login buttons
-            loggedInNavInfo.classList.remove('hidden'); // Show welcome/logout info
-            navLoggedInUsernameSpan.textContent = username; // Display username
-            
-            // Fetch initial image count for logged-in user from localStorage (set during login)
-            currentUserImageCount = parseInt(localStorage.getItem('image_count') || '0', 10);
-            updateImageCounterDisplay();
-
-            // Ensure buttons are enabled as authenticated users have no fixed limit here
-            uploadSubmitBtn.disabled = false;
-            uploadSubmitBtn.textContent = 'Process Uploaded Image'; // Restore text
-            base64SubmitBtn.disabled = false;
-            base64SubmitBtn.textContent = 'Process Base64 String'; // Restore text
-
-            imageProcessingStatus.textContent = ''; // Clear status message
-        } else {
-            // User is logged out
-            authNavButtons.classList.remove('hidden'); // Show signup/login buttons
-            loggedInNavInfo.classList.add('hidden'); // Hide welcome/logout info
-            navLoggedInUsernameSpan.textContent = ''; // Clear username
-            
-            updateImageCounterDisplay(); // Update unauth counter display (will show 0)
-
-            // Buttons are always enabled for unauthenticated users as there's no backend limit
-            uploadSubmitBtn.disabled = false;
-            uploadSubmitBtn.textContent = 'Process Uploaded Image';
-            base64SubmitBtn.disabled = false;
-            base64SubmitBtn.textContent = 'Process Base64 String';
-            imageProcessingStatus.textContent = `You are using the free, unauthenticated service.`;
-            imageProcessingStatus.classList.remove('text-danger');
-            imageProcessingStatus.classList.add('text-gray-600', 'dark:text-gray-400');
-        }
-    }
-
-    // Initial UI update on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        updateUI();
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('token') && window.location.pathname === '/reset-password-form') {
-            // User is coming from a password reset link
-            openModal(resetPasswordModal);
-            resetTokenInput.value = urlParams.get('token');
-            // Email input is not pre-filled from URL for security, user will re-enter
-        }
-    });
-
-
-    // --- Modal Control Functions ---
-    function openModal(modalElement) {
-        modalElement.classList.add('show');
-    }
-
-    function closeModal(modalElement) {
-        modalElement.classList.remove('show');
-        // Clear form fields and messages when closing
-        if (modalElement === registerModal) {
-            registerForm.reset();
-            registerMessage.textContent = '';
-            registerMessage.classList.remove('text-success', 'text-danger');
-        } else if (modalElement === loginModal) {
-            loginForm.reset();
-            loginMessage.textContent = '';
-            loginMessage.classList.remove('text-success', 'text-danger');
-        } else if (modalElement === forgotPasswordModal) {
-            forgotPasswordForm.reset();
-            forgotPasswordMessage.textContent = '';
-            forgotPasswordMessage.classList.remove('text-success', 'text-danger');
-        } else if (modalElement === resetPasswordModal) {
-            resetPasswordForm.reset();
-            resetPasswordMessage.textContent = '';
-            resetPasswordMessage.classList.remove('text-success', 'text-danger');
-            // Clear URL parameters for security after closing reset modal
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    }
-
-    // --- Navbar Auth Button Event Listeners ---
-    navSignupBtn.addEventListener('click', () => {
-        closeModal(loginModal); // Close login if open
-        closeModal(forgotPasswordModal); // Close forgot password if open
-        openModal(registerModal);
-    });
-
-    navLoginBtn.addEventListener('click', () => {
-        closeModal(registerModal); // Close register if open
-        closeModal(forgotPasswordModal); // Close forgot password if open
-        openModal(loginModal);
-    });
-
-    // --- Modal Close Buttons ---
-    registerModalClose.addEventListener('click', () => closeModal(registerModal));
-    loginModalClose.addEventListener('click', () => closeModal(loginModal));
-    forgotPasswordModalClose.addEventListener('click', () => closeModal(forgotPasswordModal)); // New
-    resetPasswordModalClose.addEventListener('click', () => closeModal(resetPasswordModal)); // New
-
-    // Close modals if clicking outside content
-    registerModal.addEventListener('click', (e) => {
-        if (e.target === registerModal) closeModal(registerModal);
-    });
-    loginModal.addEventListener('click', (e) => {
-        if (e.target === loginModal) closeModal(loginModal);
-    });
-    forgotPasswordModal.addEventListener('click', (e) => { // New
-        if (e.target === forgotPasswordModal) closeModal(forgotPasswordModal);
-    });
-    resetPasswordModal.addEventListener('click', (e) => { // New
-        if (e.target === resetPasswordModal) closeModal(resetPasswordModal);
-    });
-
-
-    // --- Links between Modals ---
-    modalShowLoginLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        closeModal(registerModal);
-        openModal(loginModal);
-    });
-
-    modalShowRegisterLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        closeModal(loginModal);
-        openModal(registerModal);
-    });
-
-    modalForgotPasswordLink.addEventListener('click', (e) => { // New
-        e.preventDefault();
-        closeModal(loginModal);
-        openModal(forgotPasswordModal);
-    });
-
-    modalBackToLoginLink.addEventListener('click', (e) => { // New
-        e.preventDefault();
-        closeModal(forgotPasswordModal);
-        openModal(loginModal);
-    });
-
-
-    // --- Authentication Form Handlers ---
-
-    // Register Form Submission
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        registerMessage.textContent = 'Registering...';
-        registerMessage.classList.remove('text-success', 'text-danger');
-
-        const email = registerEmailInput.value.trim();
-        const username = registerUsernameInput.value.trim(); // Get username
-        const password = registerPasswordInput.value.trim();
-
-        try {
-            const response = await fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, username, password }) // Send username
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                registerMessage.textContent = result.message || 'Registration successful!';
-                registerMessage.classList.add('text-success');
-                showCustomModal('Registration successful! Please check your email to verify your account, then log in.', true);
-                // Switch to login form after successful registration
-                closeModal(registerModal);
-                openModal(loginModal);
-                loginEmailInput.value = email; // Pre-fill email
-                loginPasswordInput.value = '';
-            } else {
-                registerMessage.textContent = result.detail || 'Registration failed.';
-                registerMessage.classList.add('text-danger');
-                showCustomModal(result.detail || 'Registration failed.', false);
-            }
-        } catch (error) {
-            console.error('Error during registration:', error);
-            registerMessage.textContent = 'An error occurred during registration.';
-            registerMessage.classList.add('text-danger');
-            showCustomModal('An error occurred during registration.', false);
-        }
-    });
-
-    // Login Form Submission
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        loginMessage.textContent = 'Logging in...';
-        loginMessage.classList.remove('text-success', 'text-danger');
-
-        const email = loginEmailInput.value.trim();
-        const password = loginPasswordInput.value.trim();
-
-        try {
-            // Note: The backend /token endpoint expects 'username' and 'password'.
-            // Here, we're using 'email' from the form as 'username' for the backend.
-            // You might want to adjust your backend's /token endpoint to accept 'email' directly,
-            // or ensure the user logs in with their chosen username.
-            const response = await fetch('/token', { // Changed to /token as per backend
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: email, password: password }) // Sending email as username for login
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('access_token', result.access_token);
-                localStorage.setItem('email', result.email);
-                localStorage.setItem('username', result.username); // Store username
-                localStorage.setItem('image_count', result.image_count); // Store user's image count
-                
-                currentUserImageCount = result.image_count; // Update global counter
-                loginMessage.textContent = 'Login successful!';
-                loginMessage.classList.add('text-success');
-                showCustomModal('Login successful!', true);
-                closeModal(loginModal); // Close login modal
-                updateUI(); // Update UI to show image processing section
-            } else {
-                loginMessage.textContent = result.detail || 'Login failed.';
-                loginMessage.classList.add('text-danger');
-                showCustomModal(result.detail || 'Login failed.', false);
-            }
-        } catch (error) {
-            console.error('Error during login:', error);
-            loginMessage.textContent = 'An error occurred during login.';
-            loginMessage.classList.add('text-danger');
-            showCustomModal('An error occurred during login.', false);
-        }
-    });
-
-    // Logout Button (in navbar)
-    navLogoutBtn.addEventListener('click', async () => {
-        try {
-            const token = localStorage.getItem('access_token');
-            if (!token) {
-                console.warn("No access token found to logout.");
-                showCustomModal('You are already logged out.', true);
-                return;
-            }
-
-            const response = await fetch('/logout', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showCustomModal(result.message || 'You have been logged out.', true);
-            } else {
-                showCustomModal(result.detail || 'Logout failed.', false);
-            }
-        } catch (error) {
-            console.error('Error during logout:', error);
-            showCustomModal('An error occurred during logout.', false);
-        } finally {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('email');
-            localStorage.removeItem('username'); // Remove username
-            localStorage.removeItem('image_count'); // Remove image count
-            updateUI(); // Update UI to show authentication forms
-        }
-    });
-
-    // Forgot Password Form Submission (New)
-    forgotPasswordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        forgotPasswordMessage.textContent = 'Sending reset link...';
-        forgotPasswordMessage.classList.remove('text-success', 'text-danger');
-
-        const email = forgotEmailInput.value.trim();
-
-        try {
-            const response = await fetch('/request-password-reset', { // Changed endpoint
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email }) // Send email directly
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                forgotPasswordMessage.textContent = result.message || 'If an account with that email exists, a password reset link has been sent.';
-                forgotPasswordMessage.classList.add('text-success');
-                showCustomModal(result.message || 'If an account with that email exists, a password reset link has been sent.', true);
-                forgotPasswordForm.reset();
-                closeModal(forgotPasswordModal); // Close modal after sending link
-                openModal(loginModal); // Optionally, go back to login
-            } else {
-                forgotPasswordMessage.textContent = result.detail || 'Failed to send reset link.';
-                forgotPasswordMessage.classList.add('text-danger');
-                showCustomModal(result.detail || 'Failed to send reset link.', false);
-            }
-        } catch (error) {
-            console.error('Error during forgot password:', error);
-            forgotPasswordMessage.textContent = 'An error occurred. Please try again.';
-            forgotPasswordMessage.classList.add('text-danger');
-            showCustomModal('An error occurred. Please try again.', false);
-        }
-    });
-
-    // Reset Password Form Submission (New)
-    resetPasswordForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        resetPasswordMessage.textContent = 'Resetting password...';
-        resetPasswordMessage.classList.remove('text-success', 'text-danger');
-
-        const token = resetTokenInput.value;
-        const newPassword = newPasswordInput.value;
-        const confirmNewPassword = confirmNewPasswordInput.value;
-
-        if (newPassword !== confirmNewPassword) {
-            resetPasswordMessage.textContent = 'Passwords do not match.';
-            resetPasswordMessage.classList.add('text-danger');
-            showCustomModal('Passwords do not match.', false);
-            return;
-        }
-
-        try {
-            const response = await fetch('/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: token, new_password: newPassword })
-            });
-            const result = await response.json();
-
-            if (response.ok) {
-                resetPasswordMessage.textContent = result.message || 'Password reset successfully!';
-                resetPasswordMessage.classList.add('text-success');
-                showCustomModal('Password reset successfully! You can now log in.', true);
-                resetPasswordForm.reset();
-                closeModal(resetPasswordModal); // Close modal after successful reset
-                openModal(loginModal); // Go to login
-            } else {
-                resetPasswordMessage.textContent = result.detail || 'Password reset failed.';
-                resetPasswordMessage.classList.add('text-danger');
-                showCustomModal(result.detail || 'Password reset failed.', false);
-            }
-        } catch (error) {
-            console.error('Error during password reset:', error);
-            resetPasswordMessage.textContent = 'An error occurred during password reset.';
-            resetPasswordMessage.classList.add('text-danger');
-            showCustomModal('An error occurred during password reset.', false);
-        }
-    });
-
-
-    // --- Image Processing Demo Handlers (Modified to include Authorization header) ---
 
     // Function to open the image modal
     function openImageModal(imageUrl) {
@@ -1143,48 +628,6 @@
         });
     }
 
-    // Function to handle image processing and display (for file input)
-    function processImage(file) {
-        if (file && file.type.startsWith('image/')) {
-            console.log('File selected:', file.name);
-            loadingIndicator.classList.remove('hidden');
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                base64Input.value = e.target.result; // Populate base64 input
-                imagePreviewContainer.classList.remove('hidden');
-                loadingIndicator.classList.add('hidden');
-                console.log('Image preview updated and base64 input populated.');
-            };
-            reader.onerror = function() {
-                loadingIndicator.classList.add('hidden');
-                console.error("Error reading file.");
-                showCustomModal("Failed to read image file. Please try again.", false);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            showCustomModal("Please upload an image file.", false);
-        }
-    }
-
-    // Event Listener for File Input
-    fileInput.addEventListener('change', (e) => {
-        console.log('File input change detected.');
-        if (e.target.files.length > 0) {
-            processImage(e.target.files[0]);
-        }
-    });
-
-    // Event listener for clicking the image preview to open the modal
-    if (imagePreview) {
-        imagePreview.addEventListener('click', () => {
-            if (imagePreview.src && imagePreview.src !== window.location.href + '#') { // Ensure there's an image loaded
-                openImageModal(imagePreview.src);
-            }
-        });
-    }
-
-
     // Clear Image Button
     if (clearImageBtn) {
         clearImageBtn.addEventListener('click', () => {
@@ -1192,10 +635,9 @@
             imagePreview.src = '#';
             imagePreviewContainer.classList.add('hidden');
             base64Input.value = '';
-            fileInput.value = ''; // Clear file input as well
-            base64Result.textContent = ''; // Clear result
-            uploadResult.textContent = ''; // Clear upload result as well
-            // Do NOT reset imageCounter on clear, only on successful processing
+            uploadResult.textContent = ''; // Clear upload result
+            base64Result.textContent = ''; // Clear base64 result
+            fileInput.value = ''; // Clear file input
         });
     }
 
@@ -1235,28 +677,13 @@
             loadingIndicator.classList.remove('hidden');
             console.log('Base64 processing initiated: loading state active.');
 
-
-            const token = localStorage.getItem('access_token');
-            
-            // Determine if authenticated or unauthenticated
-            let isAuth = !!token;
-            let endpoint = '';
-            if (isAuth) {
-                endpoint = '/base64-process'; // Authenticated endpoint
-            } else {
-                endpoint = '/base64-free'; // Unauthenticated endpoint
-            }
+            const endpoint = '/base64'; // Endpoint for Base64 processing
             console.log(`Sending Base64 request to ${endpoint}`);
 
             try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (isAuth) {
-                    headers['Authorization'] = `Bearer ${token}`; // Include the JWT token
-                }
-
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: headers,
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ base64_str: base64String })
                 });
 
@@ -1266,27 +693,13 @@
                 if (response.ok) { // Check if the response status is 2xx
                     base64Result.textContent = `AI response: ${result.text}`;
                     base64Result.classList.add('text-success', 'result-fade-in'); // Add animation class
-                    
-                    if (isAuth) {
-                        currentUserImageCount = result.image_count; // Update from backend
-                        localStorage.setItem('image_count', currentUserImageCount);
-                    }
+                    totalImagesProcessed++; // Increment counter
                     updateImageCounterDisplay(); // Update display
-                    updateUI(); // Re-check limits and update status message
                     console.log('Base64 processing successful.');
                 } else {
                     base64Result.textContent = `Processing failed: ${result.detail || result.error || 'Unknown error'}`;
                     base64Result.classList.add('text-danger', 'result-fade-in'); // Add animation class even on error
-                    if (response.status === 401 || response.status === 403) { // Also check 403 for unverified
-                        showCustomModal(result.detail || "Authentication failed or token expired. Please log in again.", false);
-                        localStorage.removeItem('access_token'); // Clear invalid token
-                        localStorage.removeItem('email');
-                        localStorage.removeItem('username');
-                        localStorage.removeItem('image_count');
-                        updateUI(); // Redirect to login
-                    } else {
-                        showCustomModal(result.detail || result.error || 'Processing failed.', false);
-                    }
+                    showCustomModal(result.detail || result.error || 'Processing failed.', false);
                     console.error('Base64 processing failed:', result.detail || result.error || 'Unknown error');
                 }
 
@@ -1304,6 +717,26 @@
             }
         });
     }
+
+    // Event Listener for File Input
+    fileInput.addEventListener('change', (e) => {
+        console.log('File input change detected.');
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imagePreview.src = event.target.result;
+                    imagePreviewContainer.classList.remove('hidden');
+                    // Optionally populate Base64 input with the uploaded image's Base64
+                    base64Input.value = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                showCustomModal("Please select an image file.", false);
+            }
+        }
+    });
 
     // Event listener for the upload-form submission
     if (uploadForm) {
@@ -1327,33 +760,16 @@
             loadingIndicator.classList.remove('hidden');
             console.log('Image upload processing initiated: loading state active.');
 
-            const token = localStorage.getItem('access_token');
-            
-            // Determine if authenticated or unauthenticated
-            let isAuth = !!token;
-            let endpoint = '';
-            if (isAuth) {
-                endpoint = '/image-upload'; // Authenticated endpoint
-            } else {
-                endpoint = '/image-upload-free'; // Unauthenticated endpoint
-            }
+            const endpoint = '/upload'; // Endpoint for image file upload
             console.log(`Sending image upload request to ${endpoint}`);
 
             try {
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const headers = {};
-                if (isAuth) {
-                    headers['Authorization'] = `Bearer ${token}`; // Include the JWT token
-                }
-                // Note: Content-Type for FormData is automatically set by the browser
-                // when you pass a FormData object as the body.
-
                 const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: headers,
-                    body: formData
+                    body: formData // Content-Type is automatically set to multipart/form-data
                 });
 
                 const result = await response.json();
@@ -1362,27 +778,13 @@
                 if (response.ok) { // Check if the response status is 2xx
                     uploadResult.textContent = `AI response: ${result.text}`;
                     uploadResult.classList.add('text-success', 'result-fade-in'); // Add animation class
-                    
-                    if (isAuth) {
-                        currentUserImageCount = result.image_count; // Update from backend
-                        localStorage.setItem('image_count', currentUserImageCount);
-                    }
+                    totalImagesProcessed++; // Increment counter
                     updateImageCounterDisplay(); // Update display
-                    updateUI(); // Re-check limits and update status message
                     console.log('Image upload successful.');
                 } else {
                     uploadResult.textContent = `Processing failed: ${result.detail || result.error || 'Unknown error'}`;
                     uploadResult.classList.add('text-danger', 'result-fade-in'); // Add animation class
-                    if (response.status === 401 || response.status === 403) { // Also check 403 for unverified
-                        showCustomModal(result.detail || "Authentication failed or token expired. Please log in again.", false);
-                        localStorage.removeItem('access_token'); // Clear invalid token
-                        localStorage.removeItem('email');
-                        localStorage.removeItem('username');
-                        localStorage.removeItem('image_count');
-                        updateUI(); // Redirect to login
-                    } else {
-                        showCustomModal(result.detail || result.error || 'Processing failed.', false);
-                    }
+                    showCustomModal(result.detail || result.error || 'Processing failed.', false);
                     console.error('Image upload failed:', result.detail || result.error || 'Unknown error');
                 }
 
@@ -1400,6 +802,7 @@
             }
         });
     }
+
 
     // Add button click effect
     document.querySelectorAll('button, label[for="file-upload"]').forEach(button => {
