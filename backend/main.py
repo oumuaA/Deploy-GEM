@@ -8,7 +8,9 @@ from pathlib import Path
 
 # Import functions and PROMPT from extract.py
 #from extract import process_base64_image, process_image_file, PROMPT
-from backend.extract import process_base64_image, PROMPT
+#from backend.extract import process_base64_image, PROMPT
+from backend.extract import process_base64_image, process_image_file, PROMPT
+
 
 app = FastAPI()
 
