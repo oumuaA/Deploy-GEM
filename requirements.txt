@@ -1,11 +1,7 @@
 fastapi
 uvicorn
-python-multipart
-passlib[bcrypt]
-python-jose[cryptography]
-redis
-fastapi-limiter
-Pillow
-google-generativeai
-python-dotenv
 jinja2
+python-multipart
+Pillow
+python-dotenv
+google-generativeai
