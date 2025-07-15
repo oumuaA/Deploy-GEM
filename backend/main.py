@@ -163,9 +163,10 @@ def send_verification_email(recipient_email: str, username: str, verification_to
         # In a real app, you might want to log this error or queue for retry
 
 # --- API Endpoints ---
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/")
+async def read_root():
+    return {"status": "OK - server live"}
+
 
 @app.post("/register")
 async def register(request: Request, username: str = Body(...), email: str = Body(...), password: str = Body(...)):
