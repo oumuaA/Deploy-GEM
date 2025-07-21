@@ -1,8 +1,2 @@
 fastapi
-uvicorn
-jinja2
-python-multipart
-Pillow
-python-dotenv
-google-generativeai
 mangum
