@@ -318,10 +318,8 @@
 </head>
 <body class="bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark">
 
-  <!-- Header -->
   <header class="bg-secondary-light dark:bg-secondary-dark shadow sticky top-0 z-50">
     <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-      <!-- Left Section: Theme Toggle & Gem ANPR Title -->
       <div class="flex items-center space-x-4">
         <button id="theme-toggle" class="text-xl hover:text-accent transition" title="Toggle Theme">
             <svg id="moon-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -334,14 +332,12 @@
         <h1 id="home-link-title" class="text-2xl font-extrabold tracking-tight text-text-light dark:text-text-dark cursor-pointer hover:text-accent transition">Gem ANPR</h1>
       </div>
 
-      <!-- Center Section: Images Processed Display -->
       <div class="flex-grow flex justify-center">
         <div id="image-counter-display" class="bg-accent text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
           Images Processed: 0
         </div>
       </div>
 
-      <!-- Right Section: Navigation Links (Auth buttons removed) -->
       <nav class="flex items-center space-x-6 text-sm font-semibold">
         <a href="#interactive-demo" class="hover:text-accent transition">Demo</a>
         <a href="#pricing" class="hover:text-accent transition">Pricing</a>
@@ -350,9 +346,7 @@
     </div>
   </header>
 
-  <!-- Hero -->
   <section class="relative bg-gradient-hero-light dark:bg-gradient-hero-dark text-center py-32 px-4 overflow-hidden">
-    <!-- Animated background elements (Hexagons) -->
     <div class="hero-background-animation">
         <div class="hexagon"></div>
         <div class="hexagon"></div>
@@ -365,37 +359,31 @@
         <div class="hexagon"></div>
         <div class="hexagon"></div>
     </div>
-    <div class="container mx-auto max-w-4xl relative z-10"> <!-- Ensure content is above animation -->
-      <h2 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6 text-text-light dark:text-text-dark">Gem ANPR: Vison model for ANPR</h2>
+    <div class="container mx-auto max-w-4xl relative z-10"> <h2 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6 text-text-light dark:text-text-dark">Gem ANPR: Vison model for ANPR</h2>
       <p class="text-lg md:text-xl opacity-90 mb-10 text-text-light dark:text-text-dark">Providing edge AI for fast and precise image analysis and data extraction.</p>
     </div>
   </section>
 
-  <!-- Features -->
   <section id="features" class="py-24 px-6 bg-primary-light dark:bg-primary-dark transition-colors duration-500 fade-in-section">
     <div class="container mx-auto text-center">
       <h3 class="text-4xl font-extrabold text-text-light dark:text-text-dark mb-16">Our Core AI Capabilities</h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
         <div class="feature-card">
-          <div class="text-accent text-5xl mb-4">⚡️</div> <!-- Lightning bolt for speed -->
-          <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Hyper-Speed Processing</h4>
+          <div class="text-accent text-5xl mb-4">⚡️</div> <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Hyper-Speed Processing</h4>
           <p class="text-gray-600 dark:text-gray-400">Experience unparalleled speed with our optimized AI models.</p>
         </div>
         <div class="feature-card">
-          <div class="text-accent text-5xl mb-4">🧠</div> <!-- Brain for intelligence -->
-          <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Intelligent Recognition</h4>
+          <div class="text-accent text-5xl mb-4">🧠</div> <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Intelligent Recognition</h4>
           <p class="text-gray-600 dark:text-gray-400">Advanced deep learning ensures superior accuracy in every scan.</p>
         </div>
         <div class="feature-card">
-          <div class="text-accent text-5xl mb-4">🌐</div> <!-- Globe for global reach/connectivity -->
-          <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Seamless Integration</h4>
+          <div class="text-accent text-5xl mb-4">🌐</div> <h4 class="text-2xl font-bold mb-2 text-text-light dark:text-text-dark">Seamless Integration</h4>
           <p class="text-gray-600 dark:text-gray-400">Effortlessly integrate QuantumScan AI into your existing workflows.</p>
         </div>
       </div>
     </div>
   </section>
 
-    <!-- Interactive Demo Section (Image & Base64 Processing) -->
     <section id="interactive-demo" class="py-40 px-4 bg-primary-light dark:bg-primary-dark text-text-light dark:text-text-dark fade-in-section">
         <div class="container mx-auto max-w-5xl">
             <h3 class="text-5xl font-extrabold text-center mb-28 text-text-light dark:text-text-dark">Process Your Image Now!</h3>
@@ -403,7 +391,6 @@
                 <p class="text-xl text-gray-600 dark:text-gray-400 text-center mb-8 font-light">Upload an image or paste a Base64 string to see our AI in action.</p>
 
                 <div id="input-sections-container" class="grid grid-cols-1 md:grid-cols-3 justify-center items-stretch gap-10">
-                    <!-- File Input -->
                     <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
                         <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Upload Image (File Input)</h4>
                         <form id="upload-form" class="flex flex-col items-center space-y-6">
@@ -421,7 +408,6 @@
                         </form>
                     </div>
 
-                    <!-- Image Preview Section -->
                     <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
                         <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Image Preview</h4>
                         <div id="loading-indicator" class="hidden text-center text-accent font-medium mt-4">
@@ -438,7 +424,6 @@
                         </div>
                     </div>
 
-                    <!-- Base64 Input Section -->
                     <div class="space-y-6 flex-1 border-2 border-border-light dark:border-2 dark:border-border-dark rounded-lg p-8">
                         <h4 class="text-xl font-semibold text-text-light dark:text-text-dark text-center">Submit Base64 String</h4>
                         <form id="base64-form" class="flex flex-col items-center space-y-6">
@@ -458,7 +443,6 @@
     </section>
 
 
-  <!-- Pricing - Restored -->
   <section id="pricing" class="py-24 px-4 bg-secondary-light dark:bg-primary-dark transition-colors text-center fade-in-section">
     <div class="container mx-auto max-w-2xl">
       <h3 class="text-4xl font-extrabold text-text-light dark:text-text-dark mb-10">Flexible Pricing for Future-Ready Solutions</h3>
@@ -467,7 +451,6 @@
     </div>
   </section>
 
-  <!-- Footer -->
   <footer id="contact" class="bg-primary-dark text-text-dark text-center py-12">
     <div class="container mx-auto">
       <p class="text-lg font-mono">&copy; 2025 Gem ANPR AI. All rights reserved.</p>
@@ -478,12 +461,10 @@
     </div>
   </footer >
 
-  <!-- Image Modal Structure -->
   <div id="image-modal" class="image-modal">
       <img id="modal-image" src="" alt="Enlarged Image">
   </div>
 
-  <!-- Custom Alert Modal Structure -->
   <div id="custom-alert-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-[101] transition-opacity duration-300 opacity-0 hidden">
       <div class="bg-secondary-dark p-8 rounded-xl shadow-2xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300 border border-border-dark">
           <p class="text-xl text-text-dark text-center mb-6 font-medium"></p>
@@ -611,12 +592,14 @@
     function openImageModal(imageUrl) {
         modalImage.src = imageUrl;
         imageModal.classList.add('show');
+        document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
     }
 
     // Function to close the image modal
     function closeImageModal() {
         modalImage.src = ''; // Clear the image source
         imageModal.classList.remove('show');
+        document.body.style.overflow = ''; // Re-enable scrolling
     }
 
     // Event listener to close modal when clicking outside or on the image
@@ -628,6 +611,21 @@
         });
     }
 
+    // NEW: Zoom functionality for image preview
+    let isZoomed = false; // Track zoom state
+
+    imagePreview.addEventListener('click', () => {
+        if (!imagePreview.src || imagePreview.src === '#') return; // Do nothing if no image is loaded
+
+        if (isZoomed) {
+            closeImageModal(); // If already zoomed, close the modal
+            isZoomed = false;
+        } else {
+            openImageModal(imagePreview.src); // If not zoomed, open the modal
+            isZoomed = true;
+        }
+    });
+
     // Clear Image Button
     if (clearImageBtn) {
         clearImageBtn.addEventListener('click', () => {
@@ -638,6 +636,7 @@
             uploadResult.textContent = ''; // Clear upload result
             base64Result.textContent = ''; // Clear base64 result
             fileInput.value = ''; // Clear file input
+            isZoomed = false; // Reset zoom state when image is cleared
         });
     }
 
@@ -648,9 +647,11 @@
             if (base64String.startsWith('data:image/')) {
                 imagePreview.src = base64String;
                 imagePreviewContainer.classList.remove('hidden');
+                isZoomed = false; // Reset zoom state if base64 input changes
             } else if (base64String === '') {
                 imagePreview.src = '#';
                 imagePreviewContainer.classList.add('hidden');
+                isZoomed = false; // Reset zoom state if base64 input is empty
             }
         });
     }
@@ -730,6 +731,7 @@
                     imagePreviewContainer.classList.remove('hidden');
                     // Optionally populate Base64 input with the uploaded image's Base64
                     base64Input.value = event.target.result;
+                    isZoomed = false; // Reset zoom state when a new file is selected
                 };
                 reader.readAsDataURL(file);
             } else {

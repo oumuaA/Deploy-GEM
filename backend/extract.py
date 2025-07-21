@@ -59,4 +59,3 @@ def process_image_file(image_file_path, prompt):
     except Exception as e:
         print(f"Error processing image file: {str(e)}")
         raise e # Re-raise for FastAPI to catch and return as HTTP error
-
